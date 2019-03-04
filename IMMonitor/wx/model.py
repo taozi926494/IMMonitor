@@ -191,6 +191,7 @@ class WxGroupMember(Base):
                 logging.log(logging.ERROR, repr(err))
                 return False
 
+
 class WxGroupMessage():
     id = db.Column(db.Integer, primary_key=True, comment='自增id')
     MsgId = db.Column(db.Integer, comment='微信返回的消息id')

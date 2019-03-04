@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+</head>
+<body>
+<p id="p"></p>
+<input type="text" id="room_name">
+<button id="btn_qrcode">接收二维码</button>
+<button id="btn_wxinit">初始化微信，得到个人信息</button>
+<button id="btn_sync_check">检查是否有新消息</button>
+<button id="btn_getmsg">接收新消息</button>
+<button id="btn_get_contact">get_contact</button>
+<button id="btn_get_group_contact">btn_get_group_contact</button>
+<!-- <button id="btn_join">进入房间</button>
+<button id="btn_receive">接收消息</button> -->
+<img src="" alt="" id="qr_img" style="width: 200px; height: 200px;">
+
+<p id="retmsg"></p>
+<script>
+    var WxProxyRequseting = {
+        check_login: false,
+        sync_check: false
+    }
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on("check_join", function(res) {
+        console.log(res.msg)
+    })
+
+    $("#btn_qrcode").on("click", function() {
+        $.get("/wx/login/qrcode", function(res){
+            imgSrc = "data:image/png;base64," + res.data.qrcode
+            $('#qr_img').attr('src', imgSrc)
+
+            var isLogin = false
+            setInterval(() => {
+                if (!isLogin && !WxProxyRequseting.check_login) {
+                    WxProxyRequseting.check_login = true
+                    $.get('/wx/login/checklogin').then((res) => {
+                        WxProxyRequseting.check_login = false
+                        console.log(res)
+                        if (res.code === 200) {
+                            isLogin = true
+                        }
+                    })
+                }
+            }, 2000);
+        })
+    })
+
+    $("#btn_wxinit").on("click", function() {
+        $.get("/wx/login/init", function(res){
+            console.log(res)
+        })
+    })
+
+    $("#btn_sync_check").on("click", function() {
+        if (!WxProxyRequseting.sync_check) {
+            WxProxyRequseting.sync_check = true
+            console.log('send sync_check request')
+            $.get("/wx/message/sync_check", function(res){
+                WxProxyRequseting.sync_check = false
+                console.log(res)
+            })
+        }
+    })
+
+    $("#btn_getmsg").on("click", function() {
+        $.get("/wx/message/get_msg", function(res){
+            console.log(res)
+        })
+    })
+
+    $("#btn_get_group_contact").on("click", function() {
+        $.get("/wx/contact/get_group_contact", function(res){
+            console.log(res)
+        })
+    })
+    
+
+</script>
+</body>
+</html>

@@ -81,6 +81,7 @@ class WxAccount(Base):
                 logging.log(logging.ERROR, repr(err))
                 return False
 
+
 class WxGroup(Base):
     id = db.Column(db.Integer, primary_key=True, comment='自增id')  # 消息id 自动递增
     user_uin = db.Column(db.String(80), comment='用户uin')
@@ -119,7 +120,7 @@ class WxGroup(Base):
 
     @classmethod
     def save(cls, group_dict):
-        group = WxGroup.query.filter_by(UserName=group_dict['UserName']).first()
+        group = cls.query.filter_by(UserName=group_dict['UserName']).first()
         existed = True
         if not group:
             existed = False
@@ -144,6 +145,15 @@ class WxGroup(Base):
                 logging.log(logging.ERROR, repr(err))
                 return False
 
+    @classmethod
+    def find_one(cls, user_name):
+        """
+        查询一个群组的信息
+        :param user_name: 群组标识name @@开头
+        :return: WxGroup
+        """
+        return cls.query.filter_by(UserName=user_name).first()
+
 
 class WxGroupMember(Base):
     id = db.Column(db.Integer, primary_key=True, comment='自增id')
@@ -160,13 +170,11 @@ class WxGroupMember(Base):
     RemarkPYInitial = db.Column(db.String(3))
     RemarkPYQuanPin = db.Column(db.String(3))
     MemberStatus = db.Column(db.String(3))
-
-
     isleave = db.Column(db.String(2))
 
     @classmethod
     def save(cls, groupmember_dict):
-        groupmember = WxGroupMember.query.filter_by(UserName=groupmember_dict['UserName']).first()
+        groupmember = cls.query.filter_by(UserName=groupmember_dict['UserName']).first()
         existed = True
         if not groupmember:
             existed = False
@@ -191,8 +199,18 @@ class WxGroupMember(Base):
                 logging.log(logging.ERROR, repr(err))
                 return False
 
+    @classmethod
+    def find_one(cls, group_username, member_username):
+        """
+        查询群成员信息
+        :param group_username: 群组标识username 以@@开头
+        :param member_username: 成员标识username 以@开头
+        :return: WxGroupMember
+        """
+        return cls.query.filter_by(group_username=group_username, UserName=member_username).first()
 
-class WxGroupMessage():
+
+class WxGroupMessage(Base):
     id = db.Column(db.Integer, primary_key=True, comment='自增id')
     MsgId = db.Column(db.Integer, comment='微信返回的消息id')
     user_uin = db.Column(db.String(80), comment='哪个账号的群消息')
@@ -223,3 +241,4 @@ class WxGroupMessage():
         except Exception as err:
             logging.log(logging.ERROR, repr(err))
             return False
+

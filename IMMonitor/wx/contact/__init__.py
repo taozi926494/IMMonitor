@@ -42,6 +42,9 @@ def get_group_contact():
 
         if group_contact_res['code'] == ret_val.CODE_SUCCESS:
             save_group_contact_list(group_contact_res['data']['group_contact_list'])
+            return jsonify(ret_val.gen(ret_val.CODE_SUCCESS,
+                                       data=group_contact_res['data']['group_contact_list'],
+                                       extra_msg='提取群组信息成功'))
         else:
             return jsonify(group_contact_res)
     else:

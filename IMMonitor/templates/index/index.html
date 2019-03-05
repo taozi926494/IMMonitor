@@ -9,12 +9,18 @@
 <body>
 <p id="p"></p>
 <input type="text" id="room_name">
-<button id="btn_qrcode">接收二维码</button>
-<button id="btn_wxinit">初始化微信，得到个人信息</button>
-<button id="btn_sync_check">检查是否有新消息</button>
-<button id="btn_getmsg">接收新消息</button>
-<button id="btn_get_contact">get_contact</button>
-<button id="btn_get_group_contact">btn_get_group_contact</button>
+<button id="btn_qrcode">第一步：接收二维码</button> <br>
+<button id="btn_wxinit">第二步：初始化微信，得到个人信息</button><br>
+<button id="btn_get_group_contact">第三步：获取群联系人</button><br>
+<button id="btn_sync_check">第四步：检查是否有新消息</button><br>
+<button id="btn_getmsg">第五步：接收新消息</button><br>
+
+<button id="btn_lunxun">轮训消息检查，收发新消息</button><br>
+<div id="msg">
+    <p></p>
+</div>
+<!-- <button id="btn_get_contact">get_contact</button> -->
+
 <!-- <button id="btn_join">进入房间</button>
 <button id="btn_receive">接收消息</button> -->
 <img src="" alt="" id="qr_img" style="width: 200px; height: 200px;">
@@ -81,6 +87,53 @@
         })
     })
     
+    function lunxun() {
+        if (!WxProxyRequseting.sync_check) {
+            WxProxyRequseting.sync_check = true
+            console.log('send sync_check request')
+            $.get("/wx/message/sync_check", function(res){
+                WxProxyRequseting.sync_check = false
+
+               if (res.code == 200) {
+                    // 有新消息了
+                    if (res.data.message_status == 2) {
+                        $.get("/wx/message/get_msg", function(res){
+                            console.log(res)
+                            if (res.code == 200) {
+                                msgList = res.data
+                                if (msgList != undefined){
+                                    for (var i = 0; i < msgList.length; i++) {
+                                        $("#msg").append('<p>' + '[' + msgList[i].GroupNickName + '] ' + msgList[i].ActualNickName + ':</p>')
+                                        if (msgList[i]['Type'] == 'Text') {
+                                            $("#msg").append('<p>' + msgList[i].Content + '</p>')
+                                        } else if ((msgList[i]['Type'] == 'Image')) {
+                                            $("#msg").append('<img src="' + msgList[i].Content + '" style="width:200px;height:200px;">')
+                                        } else if ((msgList[i]['Type'] == 'Audio')) {
+                                            $("#msg").append('<audio src="' + msgList[i].Content + '" controls="controls">您的浏览器不支持 audio 标签</audio>')
+                                        }
+                                    }
+                                    lunxun()
+                                } else {
+                                    lunxun()
+                                }
+                            } else {
+                                lunxun()
+                            }
+                        })
+                    } else {
+                        lunxun()
+                    }
+               } else {
+                   alert(res.msg)
+               }
+                
+            })
+        }
+    }
+
+    $("#btn_lunxun").on("click", function() {
+        lunxun()
+    })
 
 </script>
 </body>

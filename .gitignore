@@ -60,3 +60,7 @@ target/
 
 # Database
 *.db
+
+# Message Catch
+IMMonitor/static/wxmsg/audiio/*.wav
+IMMonitor/static/wxmsg/image/*.png

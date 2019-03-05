@@ -143,20 +143,17 @@ def check_login():
 
     # 如果是确认登录
     if not data:
-        return {
-            "code": 424,
-            "status": "error",
-            "msg": "Regex extract nothing in check login response data ! 正则匹配没有在检测登录接口的返回值中匹配到任何信息 !"
-        }
+        return ret_val.gen(ret_val.CODE_PROXY_ERR,
+                           extra_msg='Regex extract nothing in check login response data ! 正则匹配没有在检测登录接口的返回值中匹配到任何信息 !')
 
     retcode = data.group(1)
     # 确认登录
     if retcode == '200':
         # 处理确认登录的返回结果
+        print('login info: ', r.text)
         if process_login_info(r.text):
             # 登录之后设置checklogin为True
             return ret_val.gen(ret_val.CODE_SUCCESS)
-
         else:
             return ret_val.gen(ret_val.CODE_PROXY_ERR,
                                extra_msg='Error when process confirm login ! 处理确认登录时发送错误 !')

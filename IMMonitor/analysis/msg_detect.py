@@ -11,6 +11,9 @@ def detect_image(image):
     :param image: 二进制图像
     :param access_token: 百度AI平台access_token
     :return:
+    成功返回：
+
+    失败返回
 
     """
 

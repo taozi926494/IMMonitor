@@ -99,4 +99,4 @@ def save_group_contact_list(group_contact_list):
             group_member['user_uin'] = user_uin
             group_member['group_username'] = group_username
             group_member['group_nickname'] = group_nickname
-            WxGroupMember.save(groupmember_dict=group_member)
+        WxGroupMember.batch_insert(groupmember_list=group_member_list)

@@ -10,7 +10,7 @@
 from IMMonitor import app, ret_val
 from IMMonitor.wx.message import proxy, utils
 from flask import jsonify, Blueprint, session
-from IMMonitor.wx.model import WxAccount
+from IMMonitor.wx.model import *
 from IMMonitor import SESSION_KEY
 
 
@@ -30,6 +30,7 @@ def get_msg():
         group_msg_list = []
         if AddMsgList:
             group_msg_list = utils.produce_group_msg(AddMsgList)
+            WxGroupMessage.batch_insert(group_msg_list)
         return jsonify(ret_val.gen(ret_val.CODE_SUCCESS,
                                    data=group_msg_list))
         # 联系人变动列表

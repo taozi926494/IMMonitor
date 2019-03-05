@@ -96,14 +96,24 @@
 
                if (res.code == 200) {
                     // 有新消息了
-                    if (res.data.message_status == 2) {
+                    if (res.data.message_status == 2 || res.data.message_status == 4 || res.data.message_status == 6) {
                         $.get("/wx/message/get_msg", function(res){
                             console.log(res)
                             if (res.code == 200) {
                                 msgList = res.data
                                 if (msgList != undefined){
                                     for (var i = 0; i < msgList.length; i++) {
-                                        $("#msg").append('<p>' + '[' + msgList[i].GroupNickName + '] ' + msgList[i].ActualNickName + ':</p>')
+                                        groupNickName =  msgList[i].GroupNickName  // 群名
+                                        fromUserNickName = msgList[i].FromUserNickName  // 昵称
+                                        fromUserDisplayName = msgList[i].FromUserDisplayName  // 群里面显示的昵称
+                                        if (fromUserDisplayName) {
+                                            $("#msg").append('<p>' + '[' + groupNickName + '] ' + fromUserNickName +
+                                             '(' + fromUserDisplayName + '):</p>')
+                                        } else {
+                                            $("#msg").append('<p>' + '[' + groupNickName + '] ' + fromUserNickName + ':</p>')
+                                        }
+
+
                                         if (msgList[i]['Type'] == 'Text') {
                                             $("#msg").append('<p>' + msgList[i].Content + '</p>')
                                         } else if ((msgList[i]['Type'] == 'Image')) {

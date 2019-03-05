@@ -19,7 +19,7 @@ import requests
 from flask import session
 from pyqrcode import QRCode
 
-from IMMonitor.wx import config, s, getBaseRequest
+from IMMonitor.wx import s, config, getBaseRequest
 from IMMonitor.wx.utils import *
 from IMMonitor import SESSION_KEY, ret_val
 from IMMonitor.wx.model import *
@@ -57,6 +57,8 @@ def sync_check():
     | 返回参数 |  selector:
     |          |    0 正常，无新消息
     |          |    2 新的消息
+    |          |    4 朋友圈有动态
+    |          |    6 有消息返回结果
     |          |    7 进入/离开聊天界面
     -----------------------------------------------------------------------------------------------------
 

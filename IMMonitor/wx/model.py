@@ -11,6 +11,7 @@ import json
 import logging
 
 from IMMonitor.db.common import db, Base
+from IMMonitor.wx import config
 
 
 class WxAccount(Base):
@@ -173,6 +174,28 @@ class WxGroupMember(Base):
     isleave = db.Column(db.String(2))
 
     @classmethod
+    def batch_insert(cls, groupmember_list):
+        """
+        批量插入群组用户
+        :param groupmember_list: 群组用户数据列表
+        :return:
+        """
+        groupmember_list_save = []
+        for groupmembe in groupmember_list:
+            newmember = cls()
+            for key in groupmembe.keys():
+                setattr(newmember, key, str(groupmembe[key]))
+                groupmember_list_save.append(newmember)
+
+        try:
+            db.session.add_all(groupmember_list_save)
+            db.session.commit()
+            return True
+        except Exception as err:
+            logging.log(logging.ERROR, repr(err))
+            return False
+
+    @classmethod
     def save(cls, groupmember_dict):
         groupmember = cls.query.filter_by(UserName=groupmember_dict['UserName']).first()
         existed = True
@@ -212,27 +235,27 @@ class WxGroupMember(Base):
 
 class WxGroupMessage(Base):
     id = db.Column(db.Integer, primary_key=True, comment='自增id')
-    MsgId = db.Column(db.Integer, comment='微信返回的消息id')
     user_uin = db.Column(db.String(80), comment='哪个账号的群消息')
-    group_nickname =db.Column(db.String(80) , comment='群名')
-    group_username = db.Column(db.String(80)
+    MsgId = db.Column(db.Integer, comment='微信返回的消息id')
+    GroupNickName =db.Column(db.String(80) , comment='群名')
+    GroupUserName = db.Column(db.String(80)
                              , comment='群的标识name（以@@开头，每次登录返回的都不一样）')
     FromUserName = db.Column(db.String(80)
                              , comment='消息发送人name（@开头，每次登录返回的都不一样）')
-    fromuser_nickname = db.Column(db.String(80), comment='消息发送人的昵称')
-    fromuser_displayname = db.Column(db.String(80), comment='消息发送人在群里面显示的昵称')
+    FromUserNickName = db.Column(db.String(80), comment='消息发送人的昵称')
+    FromUserDisplayName = db.Column(db.String(80), comment='消息发送人在群里面显示的昵称')
+
+    Type = db.Column(db.Enum(config.MSG_TEXT, config.MSG_MAP, config.MSG_IMAGE, config.MSG_AUDIO, config.MSG_VIDEO),
+                     comment='消息类型')
+    Content = db.Column(db.Text, comment='消息内容')
     atusername = db.Column(db.String(80))
-    msgtext = db.Column(db.String(255))
-    msgimg = db.Column(db.String(255))
-    msgaudio = db.Column(db.String(255))
-    msgvideo = db.Column(db.String(255))
 
     @classmethod
-    def insert(cls, message_dict):
-        message = WxGroupMessage()
+    def insert(cls, msg_dict):
+        message = cls()
 
-        for key in message_dict.keys():
-            setattr(message, key, str(message_dict[key]))
+        for key in msg_dict.keys():
+            setattr(message, key, str(msg_dict[key]))
 
         try:
             db.session.add(message)
@@ -242,3 +265,24 @@ class WxGroupMessage(Base):
             logging.log(logging.ERROR, repr(err))
             return False
 
+    @classmethod
+    def batch_insert(cls, msg_list):
+        """
+        批量存储群消息数据
+        :param msg_list: list 消息列表
+        :return:
+        """
+        msg_list_save = []
+        for msg in msg_list:
+            newmsg = cls()
+            for key in msg.keys():
+                setattr(newmsg, key, str(msg[key]))
+            msg_list_save.append(newmsg)
+
+        try:
+            db.session.add_all(msg_list_save)
+            db.session.commit()
+            return True
+        except Exception as err:
+            logging.log(logging.ERROR, repr(err))
+            return False

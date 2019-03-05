@@ -90,6 +90,7 @@ def produce_group_chat(msg, loginInfo):
 
     # 检索到当前收到信息的聊天室
     group = WxGroup.find_one(user_name=chatroomUserName)
+    print('find group: ', group)
     # TODO 如果消息不是来自已监控群的处理
     if not group:
         return
@@ -99,6 +100,7 @@ def produce_group_chat(msg, loginInfo):
         msg['GroupNickName'] = group.NickName
         # 找到发信息的成员
         member = WxGroupMember.find_one(group_username=chatroomUserName, member_username=actualUserName)
+        print('find groupuser;', member)
         # TODO 如果没有找到该成员的处理
         if not member:
             return
@@ -106,8 +108,8 @@ def produce_group_chat(msg, loginInfo):
         # 如果更新后找到发送消息成员的信息
         else:
             # 实际的昵称==成员的备注或者群昵称, 有备注显示备注, 否者显示群昵称,DisplayName群里显示的名称
-            msg['ActualNickName'] =  member.NickName
-            msg['ActualDisplayName'] = member.DisplayName
+            msg['FromUserNickName'] =  member.NickName
+            msg['FromUserDisplayName'] = member.DisplayName
             # 拼接@标志位，格式为@+登录用户在群里的显示名称
 
             # TODO 有消息at我时候的处理
@@ -126,12 +128,30 @@ def produce_group_chat(msg, loginInfo):
             #     (atFlag + (u'\u2005' if u'\u2005' in msg['Content'] else ' '))
             #     in msg['Content'] or msg['Content'].endswith(atFlag))
         # 信息的真实用户名
-        msg['ActualUserName'] = actualUserName
+        msg['FromUserName'] = actualUserName
         # 信息内容
         msg['Content'] = content
         # 信息格式化处理, 解决web微信的一些bug
         msg_formatter(msg, 'Content')
         return True
+
+
+def merge_msg(msg, msg_all, user_uin):
+    """
+    从微信返回的所有信息中提取出需要存储的信息
+    合并至已有的msg字典
+    :param msg: 已有的msg字典（包含Type Content）
+    :param msg_all: 微信返回的所有信息
+    :param user_uin: 微信用户的uin
+    :return:
+    """
+    msg['user_uin'] = user_uin
+    msg['MsgId'] = msg_all['MsgId']
+    msg['GroupNickName'] = msg_all['GroupNickName']
+    msg['GroupUserName'] = msg_all['GroupUserName']
+    msg['FromUserName'] = msg_all['FromUserName']
+    msg['FromUserNickName'] = msg_all['FromUserNickName']
+    msg['FromUserDisplayName'] = msg_all['FromUserDisplayName']
 
 
 def produce_group_msg(msgList):
@@ -181,16 +201,17 @@ def produce_group_msg(msgList):
                 data = 'Map' if data is None else data.group(1)
                 msg = {
                     'Type': 'Map',
-                    'Text': data, }
+                    'Content': data, }
 
             # 常规文本信息
             else:
                 msg = {
-                    'Type': 'Text',
+                    'Type': config.MSG_TEXT,
                     'Content': m['Content'], }
 
-            m = dict(m, **msg)
-            rl.append(m)
+            merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            print('save msg: ', msg)
+            rl.append(msg)
 
 
         # 图片或者动画表情
@@ -210,11 +231,12 @@ def produce_group_msg(msgList):
                 f.write(bite_val)
 
             msg = {
-                'Type': 'Image',
+                'Type': config.MSG_IMAGE,
                 'Content': filename.replace('IMMonitor', '') # 图片地址
             }
-            m = dict(m, **msg)
-            rl.append(m)
+            merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            print('save msg: ', msg)
+            rl.append(msg)
 
         # 音频
         elif m['MsgType'] == 34: # voice
@@ -232,11 +254,12 @@ def produce_group_msg(msgList):
                 f.write(bite_val)
 
             msg = {
-                'Type': 'Audio',
+                'Type': config.MSG_AUDIO,
                 'Content': filename.replace('IMMonitor', '')  # 图片地址
             }
-            m = dict(m, **msg)
-            rl.append(m)
+            merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            print('save msg: ', msg)
+            rl.append(msg)
 
     return rl
 

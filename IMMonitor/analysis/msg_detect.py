@@ -1,7 +1,8 @@
 import json
 from urllib.parse import urlencode
 import requests
-
+from aip import AipSpeech
+import base64
 # from IMMonitor.analysis import ACCESS_TOKEN, DETECT_URL_IMG, DETECT_URL_TEXT
 
 APP_ID = '15674182'
@@ -22,7 +23,9 @@ def detect_image(image):
     失败返回
 
     """
-
+    # 待审核图片Base64编码字符串
+    f = open(image, 'rb')
+    image = base64.b64encode(f.read())
     # 二进制方式打开图片文件
     params = {"image": image}
     params = urlencode(params)
@@ -57,12 +60,13 @@ def recognize_speech(voice):
     :param voice:语音文件的格式，pcm 或者 wav 或者 amr
     :param access_token: 百度AI平台access_token
     :return:
-    ------------------------------
-    参数	|  类型	|是否一定输出	|描述
-    err_no	int	是	错误码
-    err_msg	int	是	错误码描述
-    sn	int	是	语音数据唯一标识，系统内部产生，用于 debug
-    result	int	是	识别结果数组，提供1-5 个候选结果，string 类型为识别的字符串， utf-8 编码
+    --------------------------------------------------------------------------------------------
+    参数	    |  类型	|是否一定输出	| 描述
+    err_no	|  int	|    是	    | 错误码
+    err_msg	|  int	|    是	    | 错误码描述
+    sn	    |  int	|    是	    | 语音数据唯一标识，系统内部产生，用于 debug
+    result	|  int	|    是	    | 识别结果数组，提供1-5 个候选结果，string 类型为识别的字符串， utf-8 编码
+    --------------------------------------------------------------------------------------------
     成功返回：
     {
     "err_no": 0,
@@ -78,6 +82,8 @@ def recognize_speech(voice):
     "sn": null
     }
     """
+    data = 'ffmpeg -y  -i %s -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s.pcm'%(voice,voice)
+    os.popen(data)
     client = AipSpeech(APP_ID, API_KEY, SECRET_KEY)
     # 读取文件
     with open(voice + ".pcm", 'rb') as fp:
@@ -88,7 +94,3 @@ def recognize_speech(voice):
         else:
             result = res_dict["result"][0]
             return result
-
-	
-	
-

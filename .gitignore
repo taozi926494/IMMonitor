@@ -62,6 +62,9 @@ target/
 *.db
 
 # Message Catch
-/IMMonitor/static/wxmsg/audio/*.wav
-/IMMonitor/static/wxmsg/image/*.png
-/IMMonitor/static/wxmsg/image/*.gif
+# IMMonitor/static/wxmsg/audio/*.wav
+# IMMonitor/static/wxmsg/image/*.png
+# IMMonitor/static/wxmsg/image/*.gif
+
+# idea cache
+.idea

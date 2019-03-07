@@ -1,29 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6ca40b32-9902-4641-b3ad-68aaeac72e2f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/119191559239988176.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/1478702820740835052.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/1957815901748209709.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/244095930062060388.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/3158936130299207525.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/3285486611025521816.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/7437501303364727884.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/audio/8491384240542215196.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/image/2199997445846246743.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/image/3788626585951602948.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/static/wxmsg/image/8728443491184596704.gif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/templates/index/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/templates/index/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/contact/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/contact/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/login/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/login/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/login/proxy.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/login/proxy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/message/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/message/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/message/proxy.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/message/proxy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/message/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/message/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMMonitor/wx/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMMonitor/wx/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
-    </list>
+    <list default="true" id="6ca40b32-9902-4641-b3ad-68aaeac72e2f" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,13 +44,13 @@
         <counts>
           <entry key="gif" value="2" />
           <entry key="png" value="1" />
-          <entry key="py" value="57" />
+          <entry key="py" value="58" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Image" value="3" />
-          <entry key="Python" value="57" />
+          <entry key="Python" value="58" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -119,13 +97,25 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/IMMonitor/wx/contact/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="149">
               <caret line="48" column="43" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="43" />
               <folding>
                 <element signature="e#183#217#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/IMMonitor/analysis/msg_detect.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1961">
+              <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -209,10 +199,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
-    <option name="width" value="1938" />
-    <option name="height" value="1048" />
+    <option name="x" value="1912" />
+    <option name="y" value="-8" />
+    <option name="width" value="1616" />
+    <option name="height" value="876" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -428,10 +418,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <frame x="1912" y="-8" width="1616" height="876" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22192867" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21292776" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="0" weight="0.329718" />
@@ -444,7 +434,7 @@
       <window_info anchor="bottom" id="Cvs" order="7" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="9" />
-      <window_info anchor="bottom" id="Run" order="10" visible="true" weight="0.32577905" />
+      <window_info anchor="bottom" id="Run" order="10" visible="true" weight="0.30997303" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -458,13 +448,6 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/xxx.png" />
-    <entry file="file://$PROJECT_DIR$/IMMonitor/analysis/msg_detect.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/IMMonitor/db/common.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1078">
@@ -618,6 +601,16 @@
           <caret line="48" column="43" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="43" />
           <folding>
             <element signature="e#183#217#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/IMMonitor/analysis/msg_detect.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1961">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>

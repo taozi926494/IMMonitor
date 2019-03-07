@@ -123,9 +123,9 @@ def check_login():
     |          | 这里我们使用 proccess_login_info 函数再起发起该重定向地址的请求
     -----------------------------------------------------------------------------------------------------
     '''
-
     uuid = session.get(SESSION_KEY.WxLoginInfo).get('uuid')
 
+    # return ret_val.gen(ret_val.CODE_SUCCESS)
     # 构造checklogin请求url及参数
     url = '%s/cgi-bin/mmwebwx-bin/login' % config.BASE_URL
     localTime = int(time.time())
@@ -137,6 +137,7 @@ def check_login():
     r = s.get(url, params=params, headers=headers)
     regx = r'window.code=(\d+)'
     data = re.search(regx, r.text)
+
 
     # TODO: 扫码的时候返回用户头像用于显示
     # r.text = window.code=201;window.userAvatar = 'data:img/jpg;base64,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';
@@ -150,7 +151,6 @@ def check_login():
     # 确认登录
     if retcode == '200':
         # 处理确认登录的返回结果
-        print('login info: ', r.text)
         if process_login_info(r.text):
             # 登录之后设置checklogin为True
             return ret_val.gen(ret_val.CODE_SUCCESS)

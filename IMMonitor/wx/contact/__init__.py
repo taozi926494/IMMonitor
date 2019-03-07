@@ -13,6 +13,8 @@ from flask import jsonify, Blueprint, session
 from IMMonitor.wx.model import *
 from IMMonitor import SESSION_KEY
 from IMMonitor.wx.contact.utils import groups_name_from_contacts
+from IMMonitor.wx.utils import emoji_formatter
+import copy
 
 
 bp_wx_contact = Blueprint('bp_wx_contact', __name__)
@@ -36,14 +38,15 @@ def get_group_contact():
         contact_list = all_contact_res['data']['contact_list']
         # 从联系人列表中提取出群列表
         group_name_list = groups_name_from_contacts(contact_list)
-        print('group_name_list : ', group_name_list)
         # 存储群组的联系人信息
         group_contact_res = proxy.batch_get_group_contact(group_name_list)
 
         if group_contact_res['code'] == ret_val.CODE_SUCCESS:
-            save_group_contact_list(group_contact_res['data']['group_contact_list'])
+            group_contact_list = group_contact_res['data']['group_contact_list']
+
+            save_group_contact_list(group_contact_list)
             return jsonify(ret_val.gen(ret_val.CODE_SUCCESS,
-                                       data=group_contact_res['data']['group_contact_list'],
+                                       data=group_contact_list,
                                        extra_msg='提取群组信息成功'))
         else:
             return jsonify(group_contact_res)
@@ -90,13 +93,21 @@ def save_group_contact_list(group_contact_list):
     """
     user_uin = session[SESSION_KEY.WxLoginInfo]['uin']
     for group_contact in group_contact_list:
-        group_member_list = group_contact.pop('MemberList')
+
         group_contact['user_uin'] = user_uin
-        WxGroup.save(group_dict=group_contact)
-        group_username = group_contact['UserName']
-        group_nickname = group_contact['NickName']
-        for group_member in group_member_list:
+        emoji_formatter(group_contact, 'UserName')
+        emoji_formatter(group_contact, 'NickName')
+
+        # 这里要pop Memberlist 再存储群组信息
+        # 所以先深拷贝一下，以免修改到原来的对象
+        group_copy = copy.deepcopy(group_contact)
+        group_copy.pop('MemberList')
+        WxGroup.save_by_nickname(group_dict=group_copy)
+
+        for group_member in group_contact['MemberList']:
             group_member['user_uin'] = user_uin
-            group_member['group_username'] = group_username
-            group_member['group_nickname'] = group_nickname
-        WxGroupMember.batch_insert(groupmember_list=group_member_list)
+            group_member['GroupUserName'] = group_contact['UserName']
+            group_member['GroupNickName'] = group_contact['NickName']
+            emoji_formatter(group_member, 'UserName')
+            emoji_formatter(group_member, 'NickName')
+        WxGroupMember.batch_insert(groupmember_list=group_contact['MemberList'])

@@ -31,11 +31,14 @@ def get_msg():
         if AddMsgList:
             group_msg_list = utils.produce_group_msg(AddMsgList)
             WxGroupMessage.batch_insert(group_msg_list)
-        return jsonify(ret_val.gen(ret_val.CODE_SUCCESS,
-                                   data=group_msg_list))
+
         # 联系人变动列表
         # TODO 处理联系人变动
         ModContactList = ret['data']['ModContactList']
+        print('ModContactList: ', ModContactList)
+
+        return jsonify(ret_val.gen(ret_val.CODE_SUCCESS,
+                                   data=group_msg_list))
 
     else:
         return jsonify(ret)

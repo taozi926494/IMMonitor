@@ -41,6 +41,12 @@ def init():
             return jsonify({
                 "code": 200,
                 "status": "ok",
+                "data": {
+                    'uin': user_dict['uin'],
+                    'UserName': session[SESSION_KEY.WxLoginInfo]['url'] + user_dict['username'],
+                    'NickName': user_dict['nickname'],
+                    'HeadImgUrl': user_dict['headimgurl']
+                }
             })
         except Exception:
             return jsonify({

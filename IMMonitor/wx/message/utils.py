@@ -9,6 +9,7 @@
 import io
 import os
 import re
+import copy
 
 from flask import session
 
@@ -145,13 +146,15 @@ def merge_msg(msg, msg_all, user_uin):
     :param user_uin: 微信用户的uin
     :return:
     """
-    msg['user_uin'] = user_uin
-    msg['MsgId'] = msg_all['MsgId']
-    msg['GroupNickName'] = msg_all['GroupNickName']
-    msg['GroupUserName'] = msg_all['GroupUserName']
-    msg['FromUserName'] = msg_all['FromUserName']
-    msg['FromUserNickName'] = msg_all['FromUserNickName']
-    msg['FromUserDisplayName'] = msg_all['FromUserDisplayName']
+    new_msg = copy.deepcopy(msg)
+    new_msg['user_uin'] = user_uin
+    new_msg['MsgId'] = msg_all['MsgId']
+    new_msg['GroupNickName'] = msg_all['GroupNickName']
+    new_msg['GroupUserName'] = msg_all['GroupUserName']
+    new_msg['FromUserName'] = msg_all['FromUserName']
+    new_msg['FromUserNickName'] = msg_all['FromUserNickName']
+    new_msg['FromUserDisplayName'] = msg_all['FromUserDisplayName']
+    return new_msg
 
 
 def produce_group_msg(msgList):
@@ -209,9 +212,9 @@ def produce_group_msg(msgList):
                     'Type': config.MSG_TEXT,
                     'Content': m['Content'], }
 
-            merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            save_msg = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
             print('save msg: ', msg)
-            rl.append(msg)
+            rl.append(save_msg)
 
 
         # 图片或者动画表情
@@ -232,7 +235,7 @@ def produce_group_msg(msgList):
 
             msg = {
                 'Type': config.MSG_IMAGE,
-                'Content': filename.replace('IMMonitor', '') # 图片地址
+                'FilePath': filename.replace('IMMonitor', '')  # 图片地址
             }
             merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
             print('save msg: ', msg)
@@ -255,11 +258,12 @@ def produce_group_msg(msgList):
 
             msg = {
                 'Type': config.MSG_AUDIO,
-                'Content': filename.replace('IMMonitor', '')  # 图片地址
+                'FilePath': filename.replace('IMMonitor', ''),
+                'Content': ''  # 音频的识别结果
             }
-            merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            save_msg = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
             print('save msg: ', msg)
-            rl.append(msg)
+            rl.append(save_msg)
 
     return rl
 

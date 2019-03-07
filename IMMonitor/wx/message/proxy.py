@@ -114,8 +114,6 @@ def sync_check():
     # 如果有连接为404等异常，使用Request.raise_for_status 抛出异常
     r.raise_for_status()
 
-    print(r.text)
-
     # 提取返回参数
     regx = r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}'
     pm = re.search(regx, r.text)
@@ -159,14 +157,11 @@ def get_msg():
     r = s.post(url, data=json.dumps(data), headers=headers, timeout=config.TIMEOUT)
 
     response = json.loads(r.content.decode('utf-8', 'replace'))
-    print('----------- msg: ', response)
     if response['BaseResponse']['Ret'] != 0:
         return ret_val.gen(ret_val.CODE_PROXY_ERR,
                            extra_msg='Error get msg ! 拉取新消息出错 !')
 
     # 更新session登录信息中的synckeyresponset及synckey
-    print(session[SESSION_KEY.WxLoginInfo]['synckeydict'])
-    print(response['SyncKey'])
     session[SESSION_KEY.WxLoginInfo]['synckeydict'] = response['SyncKey']
     session[SESSION_KEY.WxLoginInfo]['synckey'] = '|'.join(['%s_%s' % (item['Key'], item['Val'])
                                           for item in response['SyncCheckKey']['List']])
@@ -236,7 +231,6 @@ def produce_group_chat(msg, loginInfo):
         msg['GroupNickName'] = group.NickName
         # 找到发信息的成员
         member = WxGroupMember.find_one(group_username=chatroomUserName, member_username=actualUserName)
-        print('member.NickName', member.NickName)
         # TODO 如果没有找到该成员的处理
         if not member:
             return None

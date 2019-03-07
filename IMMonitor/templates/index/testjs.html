@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+    \U0001f4bc
+  <script>
+  emoj = '<span class="emoji emoji1f4bc"></span>';
+  reg = new RegExp('<span class="emoji emoji(.{1,10})"></span>');
+  result = emoj.match(reg)[1]
+  console.log(result.length)
+  // function emoj_formatter() {
+  //   reg = New RegExp('<span class="emoji emoji(.{1,10})"></span>')
+  // }
+  if (result.length == 6) {
+    console.log('\\U' + result.padStart(8, '0'))
+  }
+  console.log('123'.padStart(8, '0'))
+  </script>
+</body>
+</html>

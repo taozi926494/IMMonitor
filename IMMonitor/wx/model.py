@@ -120,8 +120,15 @@ class WxGroup(Base):
     IsOwner = db.Column(db.String(3))
 
     @classmethod
-    def save(cls, group_dict):
-        group = cls.query.filter_by(UserName=group_dict['UserName']).first()
+    def save_by_nickname(cls, group_dict):
+        """
+        以群的昵称（nickname）作为唯一ID存储群组信息
+        通常用在第一次登录的时候
+        :param group_dict: 群组信息字典
+        :return:
+        """
+        # group = cls.query.filter_by(UserName=group_dict['UserName']).first()
+        group = cls.query.filter_by(NickName=group_dict['NickName']).first()
         existed = True
         if not group:
             existed = False
@@ -147,6 +154,38 @@ class WxGroup(Base):
                 return False
 
     @classmethod
+    def save_by_username(cls, group_dict):
+        """
+        以群的标识名username（@@开头，每次登录都会变）作为唯一ID存储群组信息
+        通常用在群信息出现变动的时候（群名改变、群成员改名等）
+        :param group_dict:
+        :return:
+        """
+        group = cls.query.filter_by(UserName=group_dict['UserName']).first()
+        existed = True
+        if not group:
+            existed = False
+            group = WxGroup()
+
+        for key in group_dict.keys():
+            setattr(group, key, str(group_dict[key]))
+
+        if existed:
+            try:
+                db.session.commit()
+                return True
+            except Exception as err:
+                logging.log(logging.ERROR, repr(err))
+                return False
+        else:
+            try:
+                db.session.add(group)
+                db.session.commit()
+                return True
+            except Exception as err:
+                logging.log(logging.ERROR, repr(err))
+                return False
+    @classmethod
     def find_one(cls, user_name):
         """
         查询一个群组的信息
@@ -159,8 +198,8 @@ class WxGroup(Base):
 class WxGroupMember(Base):
     id = db.Column(db.Integer, primary_key=True, comment='自增id')
     user_uin = db.Column(db.String(80), comment='用户uin')
-    group_username = db.Column(db.String(80), comment='微信群组的标识name（以@@开头，每次登录返回的都不一样）')
-    group_nickname = db.Column(db.String(80), comment='群名')
+    GroupUserName = db.Column(db.String(80), comment='微信群组的标识name（以@@开头，每次登录返回的都不一样）')
+    GroupNickName = db.Column(db.String(80), comment='群名')
     Uin =  db.Column(db.String(80), comment='群组uin（预留，目前返回的Uin都为0）')
     UserName = db.Column(db.String(80), comment='用户的标识name（以@开头，每次登录返回的都不一样）')
     DisplayName = db.Column(db.String(80), comment='用户在群里面显示的名称（用户自己修改）')
@@ -230,7 +269,7 @@ class WxGroupMember(Base):
         :param member_username: 成员标识username 以@开头
         :return: WxGroupMember
         """
-        return cls.query.filter_by(group_username=group_username, UserName=member_username).first()
+        return cls.query.filter_by(GroupUserName=group_username, UserName=member_username).first()
 
 
 class WxGroupMessage(Base):
@@ -247,7 +286,8 @@ class WxGroupMessage(Base):
 
     Type = db.Column(db.Enum(config.MSG_TEXT, config.MSG_MAP, config.MSG_IMAGE, config.MSG_AUDIO, config.MSG_VIDEO),
                      comment='消息类型')
-    Content = db.Column(db.Text, comment='消息内容')
+    Content = db.Column(db.Text, comment='消息内容/音频的识别结果')
+    FilePath = db.Column(db.Text, comment='音频/视频的存储地址')
     atusername = db.Column(db.String(80))
 
     @classmethod

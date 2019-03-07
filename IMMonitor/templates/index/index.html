@@ -10,6 +10,7 @@
 <p id="p"></p>
 <input type="text" id="room_name">
 <button id="btn_qrcode">第一步：接收二维码</button> <br>
+<button id="btn_check_login">check login</button>
 <button id="btn_wxinit">第二步：初始化微信，得到个人信息</button><br>
 <button id="btn_get_group_contact">第三步：获取群联系人</button><br>
 <button id="btn_sync_check">第四步：检查是否有新消息</button><br>
@@ -31,30 +32,40 @@
         check_login: false,
         sync_check: false
     }
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    // var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    socket.on("check_join", function(res) {
-        console.log(res.msg)
-    })
+    // socket.on("check_join", function(res) {
+    //     console.log(res.msg)
+    // })
 
     $("#btn_qrcode").on("click", function() {
         $.get("/wx/login/qrcode", function(res){
             imgSrc = "data:image/png;base64," + res.data.qrcode
             $('#qr_img').attr('src', imgSrc)
 
-            var isLogin = false
-            setInterval(() => {
-                if (!isLogin && !WxProxyRequseting.check_login) {
-                    WxProxyRequseting.check_login = true
-                    $.get('/wx/login/checklogin').then((res) => {
-                        WxProxyRequseting.check_login = false
-                        console.log(res)
-                        if (res.code === 200) {
-                            isLogin = true
-                        }
-                    })
-                }
-            }, 2000);
+            // var isLogin = false
+            // setInterval(() => {
+            //     if (!isLogin && !WxProxyRequseting.check_login) {
+            //         WxProxyRequseting.check_login = true
+            //         $.get('/wx/login/checklogin').then((res) => {
+            //             WxProxyRequseting.check_login = false
+            //             console.log(res)
+            //             if (res.code === 200) {
+            //                 isLogin = true
+            //             }
+            //         })
+            //     }
+            // }, 2000);
+        })
+    })
+
+    $("#btn_check_login").on("click", function() {
+        $.get('/wx/login/checklogin').then((res) => {
+            WxProxyRequseting.check_login = false
+            console.log(res)
+            // if (res.code === 200) {
+            //     isLogin = true
+            // }
         })
     })
 

@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Index</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+  <style>
+    * {margin: 0; padding: 0;}
+    .groups {width:350px; float: left; margin-right: 20px;}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+        <el-button @click="getQR">第一步：获取二维码</el-button>
+        <el-button @click="wx_init">第二步：初始化微信，得到个人信息</el-button>
+        <el-button @click="get_group_contact">第三步：获取群联系人</el-button>
+        <el-button @click="getQR">轮训消息检查，收发新消息</el-button>
+    </div>
+    <div>
+      <img v-if="qr_src != ''" :src="qr_src" style="width: 200px; height: 200px;">
+    </div>
+    <el-card class="groups" v-for="group in groups">
+        <div slot="header" class="clearfix">
+          <span>{[ group.NickName ]}</span>
+        </div>
+        <ul>
+            <li v-for="member in group.MemberList">
+                {[ member.NickName ]}
+                <span v-if="member.DisplayName">({[ member.DisplayName ]})</span>
+            </li>
+        </ul>
+    </el-card>
+    <!-- <el-button @click="getQR">第四步：检查是否有新消息</el-button>
+    <el-button @click="getQR">第五步：接收新消息</el-button> -->
+  </div>
+  <script>
+    group_contact = {
+    "code": 200, 
+    "data": [
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@aba01d878be98c2d5dc727cfea3a0eba", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=690212441&username=@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 8, 
+        "MemberList": [
+          {
+            "AttrStatus": 233573, 
+            "DisplayName": "\u9ece\u4e07\u82f1", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8d35\u5dde\u5927\u5b66\u9ece\u4e07\u82f1", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@9df4769ab67bc0bec2cda12f570a271899d3e335781cafa282c4b9bddc0c4b31", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 98341, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8d35\u5dde\u5927\u5b66\u5b54\u7965\u6d77", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@11936b7f063df96de6bfc4f22d029d1c73693bbbbbb7c7f764021eedb458b474", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 233701, 
+            "DisplayName": "\u6768\u6cfd\u534e", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8d35\u5e08\u5927\u6768\u6cfd\u534e", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f02b1103ea7dd49a6ad66bd3d21311fbe639ce73c4420f52861acdfe066a4f3a", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 103101, 
+            "DisplayName": "\u7a0b\u57f9\u4e1c", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8d35\u5e08\u5927\u7a0b\u57f9\u4e1c", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@fe5afe03deeb2e790dfcf6aa5672fefeeed97b09b44c0f48c6c3e831eb7d156c", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 233829, 
+            "DisplayName": "\u9648\u6797\u7fe0", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u6797\u7fe0", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@e91f5228306b0ab429c1f924531b6a61f4b5e24fde3690bda983c713595e6a99", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 110693, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8881\u516c\u840d", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@7e0baf64810c6cb2891ea56e8958dcb7079c74a39203a11c5641a62f7d9b2cdc", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102437, 
+            "DisplayName": "\u66f9\u4e8c\u5f6a", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+            "GroupUserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u66f9\u4e8c\u5f6a", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f2ec8562d722f6a17860c0e7ee22bf4eae011878a7ec733eea49e39447720a50", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "\u6570\u636e\u5c0f\u7fa4_ALL", 
+        "OwnerUin": 0, 
+        "PYInitial": "SJXQALL", 
+        "PYQuanPin": "shujuxiaoqunALL", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 1, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@a47f765cc3edee32e85cb167a9fe72fe813ae6965f4e05a8b1405598cb81ab39", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }, 
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@8049d408e277a80fb5aa922c56db070d", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=690226879&username=@@6910eb483a853fa5b64dd6e2d27f761d9f2f09bc15377a881b1ae9bab0cd3e93&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 3, 
+        "MemberList": [
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "home", 
+            "GroupUserName": "@@6910eb483a853fa5b64dd6e2d27f761d9f2f09bc15377a881b1ae9bab0cd3e93", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "DA 0824", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@9c3240b0bbc954b84c951703234daee7763187234c682f25f1fd7bf3dc1175f8", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "", 
+            "GroupNickName": "home", 
+            "GroupUserName": "@@6910eb483a853fa5b64dd6e2d27f761d9f2f09bc15377a881b1ae9bab0cd3e93", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "home", 
+            "GroupUserName": "@@6910eb483a853fa5b64dd6e2d27f761d9f2f09bc15377a881b1ae9bab0cd3e93", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "MA 0407", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@6a0b3661c10062ba0d1365c5f6de5fc9da52a592575a616f0b252daba3480e13", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "home", 
+        "OwnerUin": 0, 
+        "PYInitial": "HOME", 
+        "PYQuanPin": "home", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 1, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@6910eb483a853fa5b64dd6e2d27f761d9f2f09bc15377a881b1ae9bab0cd3e93", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }, 
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@5f9362a3071d6d098a124fab033c0416", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=690212438&username=@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 5, 
+        "MemberList": [
+          {
+            "AttrStatus": 233701, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_WORK", 
+            "GroupUserName": "@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8d35\u5e08\u5927\u6768\u6cfd\u534e", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f02b1103ea7dd49a6ad66bd3d21311fbe639ce73c4420f52861acdfe066a4f3a", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_WORK", 
+            "GroupUserName": "@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 233829, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_WORK", 
+            "GroupUserName": "@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u6797\u7fe0", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@e91f5228306b0ab429c1f924531b6a61f4b5e24fde3690bda983c713595e6a99", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 110693, 
+            "DisplayName": "\u8881\u516c\u840d", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_WORK", 
+            "GroupUserName": "@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8881\u516c\u840d", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@7e0baf64810c6cb2891ea56e8958dcb7079c74a39203a11c5641a62f7d9b2cdc", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102437, 
+            "DisplayName": "\u66f9\u4e8c\u5f6a", 
+            "GroupNickName": "\u6570\u636e\u5c0f\u7fa4_WORK", 
+            "GroupUserName": "@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u66f9\u4e8c\u5f6a", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f2ec8562d722f6a17860c0e7ee22bf4eae011878a7ec733eea49e39447720a50", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "\u6570\u636e\u5c0f\u7fa4_WORK", 
+        "OwnerUin": 0, 
+        "PYInitial": "SJXQWORK", 
+        "PYQuanPin": "shujuxiaoqunWORK", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 1, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@7c0d355a87f39b160dcb530192c85932535bfb30f236438cc3ae74129f599b01", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }, 
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@30a3cdb94df4cbcf43cb174aeb6e301e", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=686793566&username=@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 28, 
+        "MemberList": [
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u5c0f\u59d1\u814a\u6708\u521d\u56db", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@cc80d70e047b9cfe649df680766dad75ee4ae5b4a2f0f702e642003820371388", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "DA 0824", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@9c3240b0bbc954b84c951703234daee7763187234c682f25f1fd7bf3dc1175f8", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 103293, 
+            "DisplayName": "\u67f1\u5b50", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u67f1\u5b50", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@d3db2af84fd605c2924b718e55c6aa1b15173c154cf57a7ee160b10f6d85913a", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "\u8c22\u7ea2\u97ec", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "MA 0407", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@6a0b3661c10062ba0d1365c5f6de5fc9da52a592575a616f0b252daba3480e13", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102501, 
+            "DisplayName": "\u51b2\u51b2", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u51b2\u51b2 1200", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@b36b7b31954612c0f66bab3054894758fc0dbefe0c21bd564cf5832eb4e22320", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8c22\u542f\u7ea2", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@798995550f977ecae5b2b80455c2f84e491578b6824e37cef557436658261e0a", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 36901, 
+            "DisplayName": "\u738b\u76f8\u5b6613587491876", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u67b6\u5b50\u5de5\u8001\u738b13587491876", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@de3270c995225fe3c03a76516e0d2816f4fc13d7c345bda1e400f3eb4494f3bb", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 16797793, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u6210\u526f\u98df\u5e97", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@9ab57b33757ebf488d945531f6fd409c5c2ce46351ab42141ea7e434f4ddb2e1", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u6211\u5fd8\u4e0d\u4e86\u4f60", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@4fb4fc5a3339c3abacbbb51c30086835721618ce30d154ba6232db4af011981d", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4101, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\ud83c\udf3c\u6211\ud83d\udc90\u6c38\ud83c\udf38\u8fdc\ud83c\udf3a\u771f\ud83c\udf43\u5fc3\ud83c\udf37\u7231\ud83c\udf39\u4f60", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@d39f1e5dfb86ab9aa2063b035be8604786a98bcd911126267e35a43fe69ae7e9", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 16879965, 
+            "DisplayName": "\u5c0f\u96c5", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u5c0f\u96c5", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@51faf8221d5ff28666b2b2a4a20a099372f4fefe0b2ad922072a435066de7dc9", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9676\u7ef4\u5a18", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@705f441bf676079b0784a356286b2c7b2624ad7e19391585024edeeef9a29f99", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 105085, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u6c99\u6c99", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f2c481b9844c50754285c853a9e579cd03e2e5bac6b7a3915454d425dc32a510", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102589, 
+            "DisplayName": "\u4e7e\u7389", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9ed4\u8c6b", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@5f4d4f64902bf5a6cfabe29ec474a83415b6bdd75967b9c385300d4fe5c34d05", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4285, 
+            "DisplayName": "\u5c0f\u660e", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u4e09\u53d4", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@048ab25a58ab90cfcf3c4a24aef8a15dfa95de0d150c0ac8e708ef64cf4fbb33", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102405, 
+            "DisplayName": "\u7ea2\u7fa4", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u7ea2\u7fa4", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@5ed4c859d5a6ec6712ea919f801772164974b3755443626b45c00740e93bd3e2", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 135205, 
+            "DisplayName": "\u9f50\u9f50", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8c22\u742a\u742a", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@437e455ba1fc840a5ed5a518d549d90fc000eef359976e4ec0b0e3ce800f0bc8", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 36901, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u6d2a\u8273", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@35537632d89f88c04f537968805c1e256ab70734634fe335d95018016ddf3373", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 135293, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u91d1\u6797", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@1ed9cec5f97b83cb2652efe5b97124664b50bfeaa07afb21315ecc16e80cff7f", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u5c0f\u5f3a", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@d9449d4cb392dd5894f54ee335edea9f8c761900d15234dfeae5416cacf8572f", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "HEEEe", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@0c6fc064583c863f0adf0fec5337f9ee7ade81853ab8cfb3a18a60538569c525", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u4e8c\u53d4", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@c1afdeef3d59a1a2d80645b0503fc33eba97bb53872f7262ab67ada3b61d6176", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u6210\u526f\u98df\u5e97", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@e73cbbf16c52fce036f4790e1dbeb7a80a1062e7521049b5c511ceb29d91eb12", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u5168\u7ea2\u53d4", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@9cf0aecb67d500fd9e7d7c2a873a69d633932bd5e2738cbd3d816097c1d0cb18", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "\u96ea\u96ea", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u96ea\u96ea", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@c2a2bdb751c3a4b1f08e5ae3188d593edafd7c4e987b9a8a81bd7cf1ba9d2a78", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4197, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8c22\u6c5f\u4e49", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@b3dddb7381b6d13548c078ad5cae1ae50ce1e706162c27952107c5d25cb05326", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102501, 
+            "DisplayName": "", 
+            "GroupNickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+            "GroupUserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "Ai\u5c0f", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f0c187443853112059e00b6bda132bc462bab844b074df9db052fb68965323d6", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "\u5bb6\u5bb6\u5bb6\ud83c\udfe0\ud83c\udfe0\ud83c\udfe0", 
+        "OwnerUin": 0, 
+        "PYInitial": "JJJSPANCLASSEMOJIEMOJI1F3E0SPANSPANCLASSEMOJIEMOJI1F3E0SPANSPANCLASSEMOJIEMOJI1F3E0SPAN", 
+        "PYQuanPin": "jiajiajiaspanclassemojiemoji1f3e0spanspanclassemojiemoji1f3e0spanspanclassemojiemoji1f3e0span", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 0, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@ae51cef3e84bcf966ab8737ea985bb32c8336c95785ed5361a4dd384890ab950", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }, 
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@00744c79c9d50d6334090506ed2e25c9", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=690297209&username=@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 8, 
+        "MemberList": [
+          {
+            "AttrStatus": 4135, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "nzd", 
+            "MemberStatus": 0, 
+            "NickName": "\ud83d\udcbccetc\u79d1\u53d1 \u725b\u632f\u4e1c", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@864e5b3dbda4fd13413687f736763c4f", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 233829, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u9648\u6797\u7fe0", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@e91f5228306b0ab429c1f924531b6a61f4b5e24fde3690bda983c713595e6a99", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 234045, 
+            "DisplayName": "\u8a79\u5a01\u5a01", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8a79\u5a01\u5a01", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@cf8958fd86c6f368428d4a8fef123d4924bb9bd94abb605712bbed13f8267561", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 111229, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u5f6d\u96c4\u5cf0", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@157924bb9fb86e3ed45795c73f4f221972e9771c34df0a19c90a07a075ac42a7", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 33656869, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\ud83d\udcbccetc\u79d1\u53d1-\u66f9\u535a0730", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@db01bc052656c065b40346ce335c76066cb250781413172eb0343ec8b15a11ef", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 234853, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\ud83d\udcbccetc\u79d1\u53d1\u2212\u5370\u5fe0\u6587", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@6aafce239dc2fc30b6849f65c807a94205f3e5d407f5f02605e3e4828ac24fbc", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 102439, 
+            "DisplayName": "", 
+            "GroupNickName": "\u6d4b\u8bd520181211", 
+            "GroupUserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+            "KeyWord": "yzy", 
+            "MemberStatus": 0, 
+            "NickName": "\ud83d\udcbccetc\u4e25\u589e\u52c7", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@5f381188d36d6634979a86f6048ddf1b", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "\u6d4b\u8bd520181211", 
+        "OwnerUin": 0, 
+        "PYInitial": "CS20181211", 
+        "PYQuanPin": "ceshi20181211", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 1, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@999c7957da9d811ad09474a68581a92066e1526120a8cd04a202a99112846d68", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }, 
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@56051328bb2f1048e157042f8ef024f3", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=690299739&username=@@8364d15abee663ff47c0c10349d36f058fe653f1372a3961f5930634b5001631&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 3, 
+        "MemberList": [
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "\u563f\u563f\u6d4b\u8bd5", 
+            "GroupUserName": "@@8364d15abee663ff47c0c10349d36f058fe653f1372a3961f5930634b5001631", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "HEEEe", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@0c6fc064583c863f0adf0fec5337f9ee7ade81853ab8cfb3a18a60538569c525", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 229733, 
+            "DisplayName": "", 
+            "GroupNickName": "\u563f\u563f\u6d4b\u8bd5", 
+            "GroupUserName": "@@8364d15abee663ff47c0c10349d36f058fe653f1372a3961f5930634b5001631", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u738b\u5de7n0323", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@a08c4e9c849ce18f574a3176b3e30780916929ecd10cb9197ac6f6d81b941fb4", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "", 
+            "GroupNickName": "\u563f\u563f\u6d4b\u8bd5", 
+            "GroupUserName": "@@8364d15abee663ff47c0c10349d36f058fe653f1372a3961f5930634b5001631", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "\u563f\u563f\u6d4b\u8bd5", 
+        "OwnerUin": 0, 
+        "PYInitial": "HHCS", 
+        "PYQuanPin": "haihaiceshi", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 1, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@8364d15abee663ff47c0c10349d36f058fe653f1372a3961f5930634b5001631", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }, 
+      {
+        "Alias": "", 
+        "AppAccountFlag": 0, 
+        "AttrStatus": 0, 
+        "ChatRoomId": 0, 
+        "City": "", 
+        "ContactFlag": 3, 
+        "DisplayName": "", 
+        "EncryChatRoomId": "@002f72a7f46611bcd84f65ab95ddba75", 
+        "HeadImgUrl": "/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=690302334&username=@@d3b5b23c6b65204a725d8e0c37a0c44def4530f29478ce31ba47151b023eeff3&skey=", 
+        "HideInputBarFlag": 0, 
+        "IsOwner": 1, 
+        "KeyWord": "", 
+        "MemberCount": 4, 
+        "MemberList": [
+          {
+            "AttrStatus": 135205, 
+            "DisplayName": "", 
+            "GroupNickName": "IMMonitor\u6d4b\u8bd5\ud83d\udcbc", 
+            "GroupUserName": "@@d3b5b23c6b65204a725d8e0c37a0c44def4530f29478ce31ba47151b023eeff3", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8c2d\u5174\u677e", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@7b7d3b8593620c9272f1f198f30db477debd1b2677ade471e8e3d0519e1299e9", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 104487, 
+            "DisplayName": "\u6539\u540d\u56de\u6765", 
+            "GroupNickName": "IMMonitor\u6d4b\u8bd5\ud83d\udcbc", 
+            "GroupUserName": "@@d3b5b23c6b65204a725d8e0c37a0c44def4530f29478ce31ba47151b023eeff3", 
+            "KeyWord": "tao", 
+            "MemberStatus": 0, 
+            "NickName": "Taoz", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@f6957a55e446e8bc1aa46c9a87be6532", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 110693, 
+            "DisplayName": "", 
+            "GroupNickName": "IMMonitor\u6d4b\u8bd5\ud83d\udcbc", 
+            "GroupUserName": "@@d3b5b23c6b65204a725d8e0c37a0c44def4530f29478ce31ba47151b023eeff3", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "\u8881\u516c\u840d", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@7e0baf64810c6cb2891ea56e8958dcb7079c74a39203a11c5641a62f7d9b2cdc", 
+            "user_uin": "1812385440"
+          }, 
+          {
+            "AttrStatus": 4133, 
+            "DisplayName": "", 
+            "GroupNickName": "IMMonitor\u6d4b\u8bd5\ud83d\udcbc", 
+            "GroupUserName": "@@d3b5b23c6b65204a725d8e0c37a0c44def4530f29478ce31ba47151b023eeff3", 
+            "KeyWord": "", 
+            "MemberStatus": 0, 
+            "NickName": "HEEEe", 
+            "PYInitial": "", 
+            "PYQuanPin": "", 
+            "RemarkPYInitial": "", 
+            "RemarkPYQuanPin": "", 
+            "Uin": 0, 
+            "UserName": "@0c6fc064583c863f0adf0fec5337f9ee7ade81853ab8cfb3a18a60538569c525", 
+            "user_uin": "1812385440"
+          }
+        ], 
+        "NickName": "IMMonitor\u6d4b\u8bd5\ud83d\udcbc", 
+        "OwnerUin": 0, 
+        "PYInitial": "IMMONITORCSSPANCLASSEMOJIEMOJI1F4BCSPAN", 
+        "PYQuanPin": "IMMonitorceshispanclassemojiemoji1f4bcspan", 
+        "Province": "", 
+        "RemarkName": "", 
+        "RemarkPYInitial": "", 
+        "RemarkPYQuanPin": "", 
+        "Sex": 0, 
+        "Signature": "", 
+        "SnsFlag": 0, 
+        "StarFriend": 0, 
+        "Statues": 1, 
+        "Uin": 0, 
+        "UniFriend": 0, 
+        "UserName": "@@d3b5b23c6b65204a725d8e0c37a0c44def4530f29478ce31ba47151b023eeff3", 
+        "VerifyFlag": 0, 
+        "user_uin": "1812385440"
+      }
+    ], 
+    "msg": "\u6210\u529f ! \u63d0\u53d6\u7fa4\u7ec4\u4fe1\u606f\u6210\u529f"
+  }
+
+
+    new Vue({
+      el: '#app',
+      delimiters: ['{[', ']}'],
+      data: {
+        WxProxy: {
+          check_login: false,
+          sync_check: true,
+          is_login: false
+        },
+        fuck: 'fuck',
+        qr_src: '',
+        groups: []
+      },
+      methods: {
+        getQR () {
+          var _self = this
+          axios.get("/wx/login/qrcode").then(function(res){
+            imgSrc = "data:image/png;base64," + res.data.data.qrcode
+
+            _self.qr_src = imgSrc
+            setInterval(() => {
+                if (!_self.WxProxy.is_login && !_self.WxProxy.check_login) {
+                  _self.WxProxy.check_login = true
+                  axios.get('/wx/login/checklogin').then((res) => {
+                    _self.WxProxy.check_login = false
+                    if (res.data.code === 200) {
+                        _self.qr_src = ''
+                        _self.$message('登录成功');
+                        _self.WxProxy.is_login = true
+                    } else if (res.data.code === 201) {
+                      _self.$message('请在手机上确认登录');
+                    } else {
+                      _self.$message('登录超时，请重新获取二维码');
+                    }
+                  })
+                }
+            }, 2000);
+          })
+        },
+
+        wx_init() {
+          var _self = this
+          axios.get("/wx/login/init").then(function(res) {
+            if (res.data.code == 200) {
+              _self.$message('初始化个人信息成功');
+            } else {
+              _self.$message('初始化个人信息失败');
+            }
+          }).catch(function (e){
+            _self.$message('初始化个人信息失败');
+          })
+        },
+
+        get_group_contact() {
+          var _self = this;
+          axios.get("/wx/contact/get_group_contact").then(function(res){
+            if (res.data.code == 200) {
+              _self.groups = res.data.data
+              _self.$message('获取群联系人信息成功');
+            } else {
+              _self.$message('获取群联系人信息失败');
+            }
+          }).catch(function (e){
+            _self.$message('获取群联系人信息失败');
+          })
+        },
+
+        message_cicle() {
+          
+        }
+        
+        // message_cicle() {
+        //   var _self = this;
+        //   if (_self.WxProxy.sync_check) {
+        //     WxProxy.sync_check = false
+        //     console.log('发送消息检测请求...')
+        //     axios.get('/wx/message/sync_check').then(function() {
+        //       _self.WxProxy.sync_check = true
+        //       if (res.data.data.message_status in [2, 4 ,6]) {
+        //         // 拉取新消息
+        //         axios.get('/wx/message/get_msg').then(function (msgres) {
+        //           if (msgres.data.code == 200) {
+        //             msgList = res.data.data
+        //             if (msgList) {
+                      
+        //             }
+        //           }
+        //         }) 
+        //       }
+
+        //     })
+        //   }
+        // }
+      }
+    })
+  </script>
+</body>
+</html>

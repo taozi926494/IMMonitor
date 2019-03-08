@@ -18,6 +18,7 @@ from IMMonitor.wx.model import *
 from IMMonitor.wx.utils import msg_formatter
 from IMMonitor.wx import config
 from IMMonitor.wx import *
+from IMMonitor.analysis import msg_detect
 
 
 def download_fn(loginInfo, url, msgId):
@@ -161,12 +162,19 @@ def produce_group_msg(msgList):
     """
     处理群消息
     :param msgList:
-    :return:
+    :return: dict
+        ret_msg_list = {
+            'msg_list': [],  # 所有的消息列表
+            'msg_list_detected': [],  # 检测出有问题的消息列表
+        }
     """
     loginInfo = session.get(SESSION_KEY.WxLoginInfo)
 
     # 消息列表
-    rl = []
+    ret_msg_list = {
+        'msg_list': [],  # 所有的消息列表
+        'msg_list_detected': [],  # 检测出有问题的消息列表
+    }
     # 无用消息类型列表码
     srl = [40, 43, 50, 52, 53, 9999]
 
@@ -208,13 +216,19 @@ def produce_group_msg(msgList):
 
             # 常规文本信息
             else:
+                content = m['Content']
                 msg = {
                     'Type': config.MSG_TEXT,
-                    'Content': m['Content'], }
+                    'Content': content, }
 
-            save_msg = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
-            print('save msg: ', msg)
-            rl.append(save_msg)
+            msg_forsave = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            ret_msg_list['msg_list'].append(msg_forsave)
+
+            # 文本检测
+            detect_result_list = msg_detect.detect_text(content)
+            detect_result_list = msg_detect.unify_detect_result(config.MSG_TEXT, m['MsgId'], detect_result_list)
+            for detect_result in detect_result_list:
+                ret_msg_list['msg_list_detected'].append(detect_result)
 
 
         # 图片或者动画表情
@@ -237,9 +251,9 @@ def produce_group_msg(msgList):
                 'Type': config.MSG_IMAGE,
                 'FilePath': filename.replace('IMMonitor', '')  # 图片地址
             }
-            merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
-            print('save msg: ', msg)
-            rl.append(msg)
+
+            msg_forsave = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            ret_msg_list['msg_list'].append(msg_forsave)
 
         # 音频
         elif m['MsgType'] == 34: # voice
@@ -261,11 +275,17 @@ def produce_group_msg(msgList):
                 'FilePath': filename.replace('IMMonitor', ''),
                 'Content': ''  # 音频的识别结果
             }
-            save_msg = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
-            print('save msg: ', msg)
-            rl.append(save_msg)
 
-    return rl
+            msg_forsave = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+            ret_msg_list['msg_list'].append(msg_forsave)
+
+            # 文本检测
+            # detect_result_list = msg_detect.detect_text(content)
+            # detect_result_list = msg_detect.unify_detect_result(config.MSG_TEXT, m['MsgId'], detect_result_list)
+            # for detect_result in detect_result_list:
+            #     ret_msg_list['msg_list_detected'].append(detect_result)
+
+    return ret_msg_list
 
 
 # def save_group_msg(group_msg_list):

@@ -12,6 +12,7 @@ from IMMonitor.wx.message import proxy, utils
 from flask import jsonify, Blueprint
 from IMMonitor.wx.model import *
 from IMMonitor.wx.contact.utils import groups_from_contacts, update_group_contact_list_by_username
+from IMMonitor.analysis.model import MsgDetectResult
 
 bp_wx_message = Blueprint('bp_wx_message', __name__)
 @app.route('/wx/message/sync_check')
@@ -29,7 +30,9 @@ def get_msg():
         group_msg_list = []
         if AddMsgList:
             group_msg_list = utils.produce_group_msg(AddMsgList)
-            WxGroupMessage.batch_insert(group_msg_list)
+            WxGroupMessage.batch_insert(group_msg_list['msg_list'])
+            if group_msg_list['msg_list_detected']:
+                MsgDetectResult.batch_insert(group_msg_list['msg_list_detected'])
 
         # 联系人变动列表
         ModContactList = ret['data']['ModContactList']

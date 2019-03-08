@@ -11,7 +11,7 @@ from IMMonitor.db.common import db, Base
 import logging
 
 
-class DetectResults(Base):
+class MsgDetectResult(Base):
     """
     检测结果数据库表头table_header
     ----------------------------------------------------------------------
@@ -46,22 +46,22 @@ class DetectResults(Base):
     # image_conclusion_data_stars = db.Column(db.Dict)
 
     @classmethod
-    def save(cls, result_list):
+    def batch_insert(cls, result_list):
         """
-        保存检测结果数据
+        批量插入检测结果数据
         :param msg_type：消息类型 -- 文本 or 图像
         :param res：传入消息检测返回的结果
         :return:
         """
 
-        save_list = []
+        insert_list = []
         for result in result_list:
-            temp_ins = DetectResults()
+            temp_ins = cls()
             for key in result.keys():
                 setattr(temp_ins, key, str(result[key]))
-            save_list.append(temp_ins)
+            insert_list.append(temp_ins)
         try:
-            db.session.add_all(save_list)
+            db.session.add_all(insert_list)
             db.session.commit()
             return True
         except Exception as err:
@@ -76,5 +76,5 @@ class DetectResults(Base):
         :return: DetectResults
         """
 
-        return DetectResults.query.filter_by(msg_id=msg_id).all()
+        return cls.query.filter_by(msg_id=msg_id).all()
         # return DetectResults.query.all()

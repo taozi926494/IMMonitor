@@ -1,7 +1,9 @@
 import json
+import sys
 from urllib.parse import urlencode
 import requests
-from aip import AipSpeech
+# from aip.speech import AipSpeech
+from IMMonitor.analysis.aip.speech import AipSpeech
 import base64
 import os
 
@@ -81,7 +83,7 @@ def detect_image(image):
     return res_dict
 
 
-def detect_text(text, access_token):
+def detect_text(text):
     """
     文字检测
     :param text: 检测文字
@@ -195,7 +197,7 @@ def unify_detect_result(msg_type, msg_id, result):
             result_list.append(temp_dict)
     if msg_type == 'Text':
         temp_dict = {}
-        if result['review'] is not None:
+        if result['review']:
             for detect_result in result['review']:
                 temp_dict['msg_id'] = msg_id
                 temp_dict['spam_type'] = 'review'
@@ -203,7 +205,7 @@ def unify_detect_result(msg_type, msg_id, result):
                 temp_dict['result_ratio'] = detect_result['score']
                 temp_dict['result_label'] = detect_result['label'] + 10
                 result_list.append(temp_dict)
-        if result['reject'] is not None:
+        if result['reject']:
             for detect_result in result['reject']:
                 temp_dict['msg_id'] = msg_id
                 temp_dict['spam_type'] = 'reject'
@@ -213,3 +215,8 @@ def unify_detect_result(msg_type, msg_id, result):
                 result_list.append(temp_dict)
     return result_list
 
+
+# BASE_DIR = os.path.dirname(__file__)
+# sys.path.append(BASE_DIR)
+#
+# print(detect_text('我们明天拿枪去天安门杀人，我草你妈'))

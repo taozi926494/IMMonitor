@@ -6,7 +6,7 @@ import requests
 from IMMonitor.analysis.aip.speech import AipSpeech
 import base64
 import os
-
+from IMMonitor.wx import config
 # from IMMonitor.analysis import ACCESS_TOKEN, DETECT_URL_IMG, DETECT_URL_TEXT
 
 APP_ID = '15674182'
@@ -131,7 +131,7 @@ def detect_text(text):
     res = requests.post(request_url, data=params)
     res_data = res.content.decode('utf-8')
     res_dict = json.JSONDecoder().decode(res_data)
-    return res_dict.get('result')
+    return res_dict
 
 
 def recognize_speech(voice):
@@ -184,39 +184,52 @@ def unify_detect_result(msg_type, msg_id, result):
     :param result: 消息检测结果返回的数据
     :return: 统一格式后的数据
     """
-
     result_list = []
-    if msg_type == "Picture":
-        temp_dict = {}
+    if msg_type == config.MSG_IMAGE:
+        spam_type = ''
+        if result['conclusionType'] == 2:
+            spam_type = 1  # 违规
+        if result['conclusionType'] == 3:
+            spam_type = 2  # 疑似
+
         for detect_result in result["data"]:
+            temp_dict = {}
             temp_dict['msg_id'] = msg_id
-            temp_dict['spam_type'] = "data"
+            temp_dict['spam_type'] = spam_type
             temp_dict['result_info'] = detect_result['msg']
             temp_dict['result_ratio'] = detect_result['probability']
             temp_dict['result_label'] = detect_result['type']
             result_list.append(temp_dict)
-    if msg_type == 'Text':
-        temp_dict = {}
-        if result['review']:
-            for detect_result in result['review']:
-                temp_dict['msg_id'] = msg_id
-                temp_dict['spam_type'] = 'review'
-                temp_dict['result_info'] = detect_result['hit']
-                temp_dict['result_ratio'] = detect_result['score']
-                temp_dict['result_label'] = detect_result['label'] + 10
-                result_list.append(temp_dict)
-        if result['reject']:
-            for detect_result in result['reject']:
-                temp_dict['msg_id'] = msg_id
-                temp_dict['spam_type'] = 'reject'
-                temp_dict['result_info'] = detect_result['hit']
-                temp_dict['result_ratio'] = detect_result['score']
-                temp_dict['result_label'] = detect_result['label'] + 10
-                result_list.append(temp_dict)
+
+    if msg_type == config.MSG_TEXT:
+        if result['result']['review']:
+            for detect_result in result['result']['review']:
+                if detect_result['hit']:
+                    temp_dict = {}
+                    temp_dict['msg_id'] = msg_id
+                    temp_dict['spam_type'] = 2
+                    temp_dict['result_info'] = ','.join(detect_result['hit'])
+                    temp_dict['result_ratio'] = detect_result['score']
+                    temp_dict['result_label'] = detect_result['label'] + 10
+                    result_list.append(temp_dict)
+
+        if result['result']['reject']:
+            for detect_result in result['result']['reject']:
+                if detect_result['hit']:
+                    temp_dict = {}
+                    temp_dict['msg_id'] = msg_id
+                    temp_dict['spam_type'] = 1
+                    temp_dict['result_info'] = ','.join(detect_result['hit'])
+                    temp_dict['result_ratio'] = detect_result['score']
+                    temp_dict['result_label'] = detect_result['label'] + 10
+                    result_list.append(temp_dict)
     return result_list
 
 
 # BASE_DIR = os.path.dirname(__file__)
 # sys.path.append(BASE_DIR)
-#
-# print(detect_text('我们明天拿枪去天安门杀人，我草你妈'))
+# result = detect_text('我们明天拿枪去天安门杀人，我草你妈')
+# result_unify = unify_detect_result('Text', '1111', result)
+# print(result)
+# print(result_unify)
+

@@ -230,7 +230,6 @@ def produce_group_msg(msgList):
             for detect_result in detect_result_list:
                 ret_msg_list['msg_list_detected'].append(detect_result)
 
-
         # 图片或者动画表情
         elif m['MsgType'] == 3 or m['MsgType'] == 47:
             # 从远处下载图像或者表情
@@ -285,6 +284,7 @@ def produce_group_msg(msgList):
             # for detect_result in detect_result_list:
             #     ret_msg_list['msg_list_detected'].append(detect_result)
 
+    print(ret_msg_list)
     return ret_msg_list
 
 

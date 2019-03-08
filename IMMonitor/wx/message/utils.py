@@ -221,14 +221,14 @@ def produce_group_msg(msgList):
                     'Type': config.MSG_TEXT,
                     'Content': content, }
 
-            msg_forsave = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
-            ret_msg_list['msg_list'].append(msg_forsave)
+                msg_forsave = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
+                ret_msg_list['msg_list'].append(msg_forsave)
 
-            # 文本检测
-            detect_result_list = msg_detect.detect_text(content)
-            detect_result_list = msg_detect.unify_detect_result(config.MSG_TEXT, m['MsgId'], detect_result_list)
-            for detect_result in detect_result_list:
-                ret_msg_list['msg_list_detected'].append(detect_result)
+                # 文本检测
+                detect_result = msg_detect.detect_text(content)
+                unify_result_list = msg_detect.unify_detect_result(config.MSG_TEXT, m['MsgId'], detect_result)
+                for unify_detect_result in unify_result_list:
+                    ret_msg_list['msg_list_detected'].append(unify_detect_result)
 
         # 图片或者动画表情
         elif m['MsgType'] == 3 or m['MsgType'] == 47:
@@ -253,6 +253,12 @@ def produce_group_msg(msgList):
 
             msg_forsave = merge_msg(msg=msg, msg_all=m, user_uin=loginInfo['uin'])
             ret_msg_list['msg_list'].append(msg_forsave)
+
+            # 图片审查
+            detect_result = msg_detect.detect_image(bite_image=bite_val)
+            unify_result_list = msg_detect.unify_detect_result(config.MSG_IMAGE, m['MsgId'], detect_result)
+            for unify_detect_result in unify_result_list:
+                ret_msg_list['msg_list_detected'].append(unify_detect_result)
 
         # 音频
         elif m['MsgType'] == 34: # voice

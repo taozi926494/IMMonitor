@@ -20,10 +20,10 @@ img_type = {'1': '色情', '2': '性感', '3': '暴恐', '4': '恶心', '5': '�
 text_label = {'11': '暴恐违禁', '12': '文本色情', '13': '政治敏感', '14': '恶意推广', '15': '低俗辱骂', '16': '低质灌水'}
 
 
-def detect_image(image):
+def detect_image(bite_image):
     """
     图像检测
-    :param image: 二进制图像
+    :param bite_image: 二进制图像
     :param access_token: 百度AI平台access_token
     :return:
     成功返回：
@@ -69,8 +69,7 @@ def detect_image(image):
 
     """
     # 待审核图片Base64编码字符串
-    f = open(image, 'rb')
-    image = base64.b64encode(f.read())
+    image = base64.b64encode(bite_image)
     # 二进制方式打开图片文件
     params = {"image": image}
     params = urlencode(params)
@@ -80,6 +79,7 @@ def detect_image(image):
     res = requests.post(request_url, data=params)
     res_data = res.content.decode('utf-8')
     res_dict = json.JSONDecoder().decode(res_data)
+    print(res_dict)
     return res_dict
 
 
@@ -192,37 +192,56 @@ def unify_detect_result(msg_type, msg_id, result):
         if result['conclusionType'] == 3:
             spam_type = 2  # 疑似
 
-        for detect_result in result["data"]:
-            temp_dict = {}
-            temp_dict['msg_id'] = msg_id
-            temp_dict['spam_type'] = spam_type
-            temp_dict['result_info'] = detect_result['msg']
-            temp_dict['result_ratio'] = detect_result['probability']
-            temp_dict['result_label'] = detect_result['type']
-            result_list.append(temp_dict)
+        for detect_result in result['data']:
+            if detect_result['type'] in (1, 2, 3, 4, 8):
+                temp_dict = {}
+                temp_dict['msg_id'] = msg_id
+                temp_dict['spam_type'] = spam_type
+                temp_dict['result_label'] = detect_result['type']
+
+                if detect_result.get('stars'):
+                    probabilities = []
+                    names = []
+                    for star in detect_result.get('stars'):
+                        probabilities.append(star.get('probability', 0))
+                        names.append(star.get('name', ''))
+
+                    temp_dict['result_info'] = ','.join(names)
+                    temp_dict['result_ratio'] = max(probabilities)
+
+                elif detect_result.get('words'):
+                    temp_dict['result_info'] = detect_result.get('words')
+                    temp_dict['result_ratio'] = detect_result['probability']
+
+                else:
+                    temp_dict['result_ratio'] = detect_result['probability']
+
+                result_list.append(temp_dict)
 
     if msg_type == config.MSG_TEXT:
         if result['result']['review']:
             for detect_result in result['result']['review']:
-                if detect_result['hit']:
-                    temp_dict = {}
-                    temp_dict['msg_id'] = msg_id
-                    temp_dict['spam_type'] = 2
-                    temp_dict['result_info'] = ','.join(detect_result['hit'])
-                    temp_dict['result_ratio'] = detect_result['score']
-                    temp_dict['result_label'] = detect_result['label'] + 10
-                    result_list.append(temp_dict)
+                if detect_result['label'] < 6:
+                    if detect_result['hit']:
+                        temp_dict = {}
+                        temp_dict['msg_id'] = msg_id
+                        temp_dict['spam_type'] = 2
+                        temp_dict['result_info'] = ','.join(detect_result['hit'])
+                        temp_dict['result_ratio'] = detect_result['score']
+                        temp_dict['result_label'] = detect_result['label'] + 20
+                        result_list.append(temp_dict)
 
         if result['result']['reject']:
             for detect_result in result['result']['reject']:
-                if detect_result['hit']:
-                    temp_dict = {}
-                    temp_dict['msg_id'] = msg_id
-                    temp_dict['spam_type'] = 1
-                    temp_dict['result_info'] = ','.join(detect_result['hit'])
-                    temp_dict['result_ratio'] = detect_result['score']
-                    temp_dict['result_label'] = detect_result['label'] + 10
-                    result_list.append(temp_dict)
+                if detect_result['label'] < 6:
+                    if detect_result['hit']:
+                        temp_dict = {}
+                        temp_dict['msg_id'] = msg_id
+                        temp_dict['spam_type'] = 1
+                        temp_dict['result_info'] = ','.join(detect_result['hit'])
+                        temp_dict['result_ratio'] = detect_result['score']
+                        temp_dict['result_label'] = detect_result['label'] + 20
+                        result_list.append(temp_dict)
     return result_list
 
 

@@ -43,19 +43,19 @@
             imgSrc = "data:image/png;base64," + res.data.qrcode
             $('#qr_img').attr('src', imgSrc)
 
-            // var isLogin = false
-            // setInterval(() => {
-            //     if (!isLogin && !WxProxyRequseting.check_login) {
-            //         WxProxyRequseting.check_login = true
-            //         $.get('/wx/login/checklogin').then((res) => {
-            //             WxProxyRequseting.check_login = false
-            //             console.log(res)
-            //             if (res.code === 200) {
-            //                 isLogin = true
-            //             }
-            //         })
-            //     }
-            // }, 2000);
+            var isLogin = false
+            setInterval(() => {
+                if (!isLogin && !WxProxyRequseting.check_login) {
+                    WxProxyRequseting.check_login = true
+                    $.get('/wx/login/checklogin').then((res) => {
+                        WxProxyRequseting.check_login = false
+                        console.log(res)
+                        if (res.code === 200) {
+                            isLogin = true
+                        }
+                    })
+                }
+            }, 2000);
         })
     })
 
@@ -63,9 +63,9 @@
         $.get('/wx/login/checklogin').then((res) => {
             WxProxyRequseting.check_login = false
             console.log(res)
-            // if (res.code === 200) {
-            //     isLogin = true
-            // }
+            if (res.code === 200) {
+                isLogin = true
+            }
         })
     })
 
@@ -111,12 +111,12 @@
                         $.get("/wx/message/get_msg", function(res){
                             console.log(res)
                             if (res.code == 200) {
-                                msgList = res.data
-                                if (msgList != undefined){
-                                    for (var i = 0; i < msgList.length; i++) {
-                                        groupNickName =  msgList[i].GroupNickName  // 群名
-                                        fromUserNickName = msgList[i].FromUserNickName  // 昵称
-                                        fromUserDisplayName = msgList[i].FromUserDisplayName  // 群里面显示的昵称
+                                if (res.data){
+                                    for (var i = 0; i < res.data.group_msg_list.length; i++) {
+                                        group_msg = res.data.group_msg_list[i]
+                                        groupNickName =  group_msg.GroupNickName  // 群名
+                                        fromUserNickName = group_msg.FromUserNickName  // 昵称
+                                        fromUserDisplayName = group_msg.FromUserDisplayName  // 群里面显示的昵称
                                         if (fromUserDisplayName) {
                                             $("#msg").append('<p>' + '[' + groupNickName + '] ' + fromUserNickName +
                                              '(' + fromUserDisplayName + '):</p>')
@@ -125,14 +125,25 @@
                                         }
 
 
-                                        if (msgList[i]['Type'] == 'Text') {
-                                            $("#msg").append('<p>' + msgList[i].Content + '</p>')
-                                        } else if ((msgList[i]['Type'] == 'Image')) {
-                                            $("#msg").append('<img src="' + msgList[i].Content + '" style="width:200px;height:200px;">')
-                                        } else if ((msgList[i]['Type'] == 'Audio')) {
-                                            $("#msg").append('<audio src="' + msgList[i].Content + '" controls="controls">您的浏览器不支持 audio 标签</audio>')
+                                        if (group_msg['Type'] == 'Text') {
+                                            $("#msg").append('<p>' + group_msg.Content + '</p>')
+                                        } else if ((group_msg['Type'] == 'Image')) {
+                                            $("#msg").append('<img src="' + group_msg.Content + '" style="width:200px;height:200px;">')
+                                        } else if ((group_msg['Type'] == 'Audio')) {
+                                            $("#msg").append('<audio src="' + group_msg.Content + '" controls="controls">您的浏览器不支持 audio 标签</audio>')
                                         }
                                     }
+                                    
+                                    for (var j = 0; j < res.data.mod_group_list.length; j++) {
+                                        group = res.data.mod_group_list[j]
+                                        console.log('改变的群名为: ' + group.NickName)
+                                        members_str = ''
+                                        for (var k = 0; k < group.MemberList.length; k++) {
+                                            members_str += group.MemberList[k].NickName + ' '
+                                        }
+                                        console.log(members_str)
+                                    }
+
                                     lunxun()
                                 } else {
                                     lunxun()

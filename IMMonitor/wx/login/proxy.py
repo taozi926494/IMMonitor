@@ -283,6 +283,7 @@ def web_init():
         return ret_val.gen(ret_val.CODE_PROXY_ERR,
                            extra_msg='Cannot get wx_init response ! 微信web_init接口未得到正确的返回结果')
 
+    print(session)
     '''
     处理用户数据
     '''

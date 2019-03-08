@@ -7,22 +7,14 @@
 # @contact : 371956576@qq.com
 # 微信联系人请求代理
 
-import base64
-import io
 import json
 import logging
-import random
-import re
 import time
-import xml
 
 from flask import session
-from pyqrcode import QRCode
 
 from IMMonitor.wx import config, s, getBaseRequest
-from IMMonitor.wx.utils import emoji_formatter
 from IMMonitor import SESSION_KEY, db
-from IMMonitor.wx.model import WxAccount
 from IMMonitor import ret_val
 
 def get_contact():
@@ -36,7 +28,6 @@ def get_contact():
 
     # url = '%s/webwxgetcontact?r=%s&seq=%s&skey=%s' % (session[SESSION_KEY.WxLoginInfo].get('url'), 1543823795,
     #                                                   0, session[SESSION_KEY.WxLoginInfo].get('skey'))
-
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
         'User-Agent': config.USER_AGENT}
@@ -88,44 +79,3 @@ def batch_get_group_contact(group_name_list):
         return ret_val.gen(ret_val.CODE_PROXY_ERR,
                            extra_msg='Failed to fetch contact ! 无法正确获得联系人返回结果 !')
 
-# def batchget_contact(group):
-#     WxGroup = WxAccount.query.filter_by(uin=session.get(SESSION_KEY.WxLoginInfo).get('uin'))
-#     url = '%s/webwxbatchgetcontact?type=ex&r=%s' % (
-#         wx_account.url, int(time.time()))
-#     headers = {
-#         'ContentType': 'application/json; charset=UTF-8',
-#         'User-Agent' : config.USER_AGENT }
-#
-#     print('------- session username: %s', session.get(SESSION_KEY.WxLoginInfo).get('username'))
-#     data = {
-#         'BaseRequest': getBaseRequest(),
-#         'Count': 5,
-#         'List': [
-#             {
-#                 'UserName': session.get(SESSION_KEY.WxLoginInfo).get('username'),
-#                 'ChatRoomId': ''
-#             },
-#             {
-#                 'UserName': session.get(SESSION_KEY.WxLoginInfo).get('username'),
-#                 'ChatRoomId': ''
-#             },
-#             {
-#                 'UserName': session.get(SESSION_KEY.WxLoginInfo).get('username'),
-#                 'ChatRoomId': ''
-#             },
-#             {
-#                 'UserName': session.get(SESSION_KEY.WxLoginInfo).get('username'),
-#                 'ChatRoomId': ''
-#             },
-#             {
-#                 'UserName': session.get(SESSION_KEY.WxLoginInfo).get('username'),
-#                 'ChatRoomId': ''
-#             }
-#         ]
-#     }
-#     chatroomList = json.loads(s.post(url, data=json.dumps(data), headers=headers
-#             ).content.decode('utf8', 'replace'))
-#
-#     # chatroomList = json.loads(s.post(url, data=json.dumps(data), headers=headers
-#     #         ).content.decode('utf8', 'replace')).get('ContactList')
-#     print(chatroomList)

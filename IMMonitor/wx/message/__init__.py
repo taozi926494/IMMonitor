@@ -9,10 +9,9 @@
 
 from IMMonitor import app, ret_val
 from IMMonitor.wx.message import proxy, utils
-from flask import jsonify, Blueprint, session
+from flask import jsonify, Blueprint
 from IMMonitor.wx.model import *
-from IMMonitor import SESSION_KEY
-
+from IMMonitor.wx.contact.utils import groups_from_contacts, update_group_contact_list_by_username
 
 bp_wx_message = Blueprint('bp_wx_message', __name__)
 @app.route('/wx/message/sync_check')
@@ -33,12 +32,16 @@ def get_msg():
             WxGroupMessage.batch_insert(group_msg_list)
 
         # 联系人变动列表
-        # TODO 处理联系人变动
         ModContactList = ret['data']['ModContactList']
-        print('ModContactList: ', ModContactList)
+        mod_group_list = groups_from_contacts(ModContactList)
+        print(mod_group_list)
+        # 因为处于已登录状态，所以更新联系人以username（@@）作为唯一ID
+        update_group_contact_list_by_username(mod_group_list)
 
         return jsonify(ret_val.gen(ret_val.CODE_SUCCESS,
-                                   data=group_msg_list))
-
+                                   data={
+                                       'group_msg_list': group_msg_list,
+                                       'mod_group_list': mod_group_list
+                                   }))
     else:
         return jsonify(ret)

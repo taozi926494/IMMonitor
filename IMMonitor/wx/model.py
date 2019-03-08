@@ -185,6 +185,8 @@ class WxGroup(Base):
             except Exception as err:
                 logging.log(logging.ERROR, repr(err))
                 return False
+
+
     @classmethod
     def find_one(cls, user_name):
         """
@@ -235,7 +237,13 @@ class WxGroupMember(Base):
             return False
 
     @classmethod
-    def save(cls, groupmember_dict):
+    def save_by_username(cls, groupmember_dict):
+        """
+        以username（@开头，每次重登都不一样）作为唯一ID存储群用户
+        通常用于群用户昵称更新
+        :param groupmember_dict: 用户数据字典
+        :return:
+        """
         groupmember = cls.query.filter_by(UserName=groupmember_dict['UserName']).first()
         existed = True
         if not groupmember:

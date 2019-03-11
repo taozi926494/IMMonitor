@@ -11,7 +11,7 @@ from IMMonitor import app, ret_val
 from IMMonitor.wx.message import proxy, utils
 from flask import jsonify, Blueprint, request
 from IMMonitor.wx.model import *
-from IMMonitor.wx.contact.utils import groups_from_contacts, update_group_contact_list
+from IMMonitor.wx.contact.utils import groups_from_contacts, update_group_contact_list, filter_group_contact_list
 from IMMonitor.analysis.model import MsgDetectResult
 
 bp_wx_message = Blueprint('bp_wx_message', __name__)
@@ -27,7 +27,10 @@ def get_msg():
     if ret['code'] == ret_val.CODE_SUCCESS:
         # 消息列表
         AddMsgList = ret['data']['AddMsgList']
-        group_msg_list = []
+        group_msg_list = {
+            'msg_list': [],  # 所有的消息列表
+            'msg_list_detected': [],  # 检测出有问题的消息列表
+        }
         if AddMsgList:
             group_msg_list = utils.produce_group_msg(AddMsgList)
             WxGroupMessage.batch_insert(group_msg_list['msg_list'])
@@ -36,8 +39,9 @@ def get_msg():
 
         # 联系人变动列表
         ModContactList = ret['data']['ModContactList']
+        print('mod contact before : ', ModContactList)
         mod_group_list = groups_from_contacts(ModContactList)
-        print(mod_group_list)
+        print('mod contact after : ', mod_group_list)
         # 因为处于已登录状态，所以更新联系人以username（@@）作为唯一ID
         update_group_contact_list(mod_group_list)
 

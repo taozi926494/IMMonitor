@@ -128,7 +128,7 @@ class WxGroup(Base):
         通常用在第一次登录的时候
         :param group_dict: 群组信息字典
         :param user_uin: 用户uin
-        :return: bool
+        :return: Group.id
         """
         existed = False
         # 先用group的昵称作为唯一ID来找该群组
@@ -157,18 +157,17 @@ class WxGroup(Base):
         if existed:
             try:
                 db.session.commit()
-                return True
+                return group.id
             except Exception as err:
                 logging.log(logging.ERROR, repr(err))
-                return False
+
         else:
             try:
                 db.session.add(group)
                 db.session.commit()
-                return True
+                return group.id
             except Exception as err:
                 logging.log(logging.ERROR, repr(err))
-                return False
 
     @classmethod
     def find_one(cls, user_name):

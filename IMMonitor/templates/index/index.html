@@ -5,18 +5,37 @@
     <title>index</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <style>
+    * {
+        margin-top: 10px;
+    }
+    </style>
 </head>
 <body>
 <p id="p"></p>
 <input type="text" id="room_name">
 <button id="btn_qrcode">第一步：接收二维码</button> <br>
-<button id="btn_check_login">check login</button>
 <button id="btn_wxinit">第二步：初始化微信，得到个人信息</button><br>
 <button id="btn_get_group_contact">第三步：获取群联系人</button><br>
 <button id="btn_sync_check">第四步：检查是否有新消息</button><br>
 <button id="btn_getmsg">第五步：接收新消息</button><br>
 
 <button id="btn_lunxun">轮训消息检查，收发新消息</button><br>
+
+<div>
+    用户username： <input type="text" id="username">
+</div>
+
+<button id="btn_getHeadImg">获取头像</button>
+
+<div id="headImgs">
+
+</div>
+
+<div id="groups">
+
+</div>
+
 
 消息：<input type="text" id="msg_content">
 <button id="btn_send_msg">发送消息给某个群</button><br>
@@ -32,9 +51,8 @@
 <img src="" alt="" id="HeadImgUrl" style="width: 200px; height: 200px;">
 <!-- <img src="https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxgeticon?&username=@9a6149aee31631f85bd64292c6c1ef08&skey=@crypt_3b31a11b_ced471d5354ad56503f953c64dd5186f" alt=""> -->
 
-<p id="retmsg"></p>
 <script>
-    var group_usernames = []
+    var group_list = [];
     var username = ''
 
     var WxProxyRequseting = {
@@ -83,6 +101,7 @@
             console.log(res)
             if (res.code == 200) {
                 console.log('res data', res.data)
+                $("#username").val(res.data.UserName)
             }
         })
     })
@@ -111,7 +130,9 @@
                 group_list = res.data
                 for (var i = 0; i < group_list.length; i++) {
                     group = group_list[i]
-                    group_usernames.push(group.UserName)
+                    node = '<div><span> ' + group.NickName + ' </span>' + 
+                    '<span class="EncryChatRoomId"> '+ group.EncryChatRoomId + ' </span>'
+                    $("#groups").append(node)
                 }
             }
         })
@@ -187,15 +208,52 @@
         lunxun()
     })
 
-    $("#btn_send_msg").on("click", function() {
-        content = $("#msg_content").val()
-        group_username = group_usernames[0]
-        $.get('/wx/message/send_msg?content=' + content + '&to_username=' + group_username)
-        .then(function (res) {
-            console.log(res)
-        })
-    })
+    // $("#btn_send_msg").on("click", function() {
+    //     content = $("#msg_content").val()
+    //     group_username = group_usernames[0]
+    //     $.get('/wx/message/send_msg?content=' + content + '&to_username=' + group_username)
+    //     .then(function (res) {
+    //         console.log(res)
+    //     })
+    // })
 
+
+    
+    $("#btn_getHeadImg").on('click', function() {
+        group_id = group_list[0].group_id
+        encry_chatroom_id = group_list[0].EncryChatRoomId
+        username = group_list[0].MemberList[0].UserName
+        user_nickname = group_list[0].MemberList[0].NickName
+        $.get('/wx/contact/get_head_img',
+            {   
+                group_id: group_id,
+                encry_chatroom_id: encry_chatroom_id,
+                username: username,
+                user_nickname: user_nickname
+            })
+            .then(function(res) {
+                console.log(res)
+                $("#headImgs").append('<img src="'+ res.data.FilePath +'" >')
+            })
+        setTimeout(function () {
+            group_id = group_list[2].group_id
+            encry_chatroom_id = group_list[2].EncryChatRoomId
+            username = group_list[2].MemberList[2].UserName
+            user_nickname = group_list[2].MemberList[2].NickName
+            $.get('/wx/contact/get_head_img',
+                {   
+                    group_id: group_id,
+                    encry_chatroom_id: encry_chatroom_id,
+                    username: username,
+                    user_nickname: user_nickname
+                })
+                .then(function(res) {
+                    console.log(res)
+                    $("#headImgs").append('<img src="'+ res.data.FilePath +'" >')
+                })         
+        }, 5000)
+       
+    })
 </script>
 </body>
 </html>

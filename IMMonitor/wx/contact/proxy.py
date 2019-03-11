@@ -6,7 +6,7 @@
 # @Author  : Taoz
 # @contact : 371956576@qq.com
 # 微信联系人请求代理
-
+import io
 import json
 import logging
 import time
@@ -79,3 +79,50 @@ def batch_get_group_contact(group_name_list):
         return ret_val.gen(ret_val.CODE_PROXY_ERR,
                            extra_msg='Failed to fetch contact ! 无法正确获得联系人返回结果 !')
 
+
+def get_member_head_img(EncryChatRoomId, username):
+    """
+    获取群用户头像
+    :param EncryChatRoomId:
+    :param username:
+    :return:
+    """
+    params = {
+        'userName': username,
+        'skey': session[SESSION_KEY.WxLoginInfo].get('skey'),
+        'chatroomid': EncryChatRoomId,
+        'type': 'big', }
+
+    url = '%s/webwxgeticon' % session[SESSION_KEY.WxLoginInfo].get('url')
+    headers = {'User-Agent': config.USER_AGENT}
+    r = s.get(url, params=params, stream=True, headers=headers)
+    tempStorage = io.BytesIO()
+    for block in r.iter_content(1024):
+        tempStorage.write(block)
+    return tempStorage.getvalue()
+
+def get_head_img(username, type=0):
+    """
+    获取自身或者群头像
+    :param EncryChatRoomId:
+    :param username:
+    :param type: 0 自身 1 群组
+    :return:
+    """
+    params = {
+        'userName': username,
+        'skey': session[SESSION_KEY.WxLoginInfo].get('skey'),
+        'type': 'big', }
+
+    # 自身
+    url = '%s/webwxgeticon' % session[SESSION_KEY.WxLoginInfo].get('url')
+    # 群组
+    if type:
+        url = '%s/webwxgetheadimg' % session[SESSION_KEY.WxLoginInfo].get('url')
+
+    headers = {'User-Agent': config.USER_AGENT}
+    r = s.get(url, params=params, stream=True, headers=headers)
+    tempStorage = io.BytesIO()
+    for block in r.iter_content(1024):
+        tempStorage.write(block)
+    return tempStorage.getvalue()

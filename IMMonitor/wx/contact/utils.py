@@ -43,6 +43,18 @@ def groups_from_contacts(contact_list):
     return groups
 
 
+def filter_group_contact_list(group_contact_list):
+    """
+    筛选掉群里面没有EncryChatRoomId的群
+    没有EncryChatRoomId证明群没有被添加到通讯录
+    对于这类群，我们不去理会
+    :param group_contact_list:
+    :return:
+    """
+    for group in group_contact_list:
+        if not group['EncryChatRoomId']:
+            group_contact_list.remove(group)
+
 
 def save_group_contact_list(group_contact_list):
     """
@@ -79,8 +91,9 @@ def save_group_contact_list(group_contact_list):
             ...
             ...
         ]
-    :return:
+    :return: list(tuple) [(group_username, group_id)] 返回用户的username及用户id
     """
+    ret = []
     user_uin = session[SESSION_KEY.WxLoginInfo]['uin']
     for group_contact in group_contact_list:
 
@@ -92,7 +105,8 @@ def save_group_contact_list(group_contact_list):
         # 所以先深拷贝一下，以免修改到原来的对象
         group_copy = copy.deepcopy(group_contact)
         group_copy.pop('MemberList')
-        WxGroup.save_one(group_dict=group_copy, user_uin=user_uin)
+        group_contact['group_id'] = WxGroup.save_one(group_dict=group_copy, user_uin=user_uin)
+        group_contact['msg_list'] = []
 
         for group_member in group_contact['MemberList']:
             group_member['user_uin'] = user_uin
@@ -113,6 +127,7 @@ def update_group_contact_list(group_contact_list):
     :param group_contact_list:
     :return:
     """
+    ret = []
     user_uin = session[SESSION_KEY.WxLoginInfo]['uin']
     for group_contact in group_contact_list:
 
@@ -120,20 +135,21 @@ def update_group_contact_list(group_contact_list):
         emoji_formatter(group_contact, 'UserName')
         emoji_formatter(group_contact, 'NickName')
 
-        # 这里要pop Memberlist 再存储群组信息
-        # 所以先深拷贝一下，以免修改到原来的对象
-        group_copy = copy.deepcopy(group_contact)
-        group_copy.pop('MemberList')
-        WxGroup.save_one(group_dict=group_copy, user_uin=user_uin)
+        if db.session.query(WxGroup).filter(WxGroup.UserName == group_contact['UserName']).first():
+            # 这里要pop Memberlist 再存储群组信息
+            # 所以先深拷贝一下，以免修改到原来的对象
+            group_copy = copy.deepcopy(group_contact)
+            group_copy.pop('MemberList')
+            group_contact['group_id'] = WxGroup.save_one(group_dict=group_copy, user_uin=user_uin)
 
-        for group_member in group_contact['MemberList']:
-            group_member['user_uin'] = user_uin
-            group_member['GroupUserName'] = group_contact['UserName']
-            group_member['GroupNickName'] = group_contact['NickName']
-            emoji_formatter(group_member, 'UserName')
-            emoji_formatter(group_member, 'NickName')
+            for group_member in group_contact['MemberList']:
+                group_member['user_uin'] = user_uin
+                group_member['GroupUserName'] = group_contact['UserName']
+                group_member['GroupNickName'] = group_contact['NickName']
+                emoji_formatter(group_member, 'UserName')
+                emoji_formatter(group_member, 'NickName')
 
-            # 这里因为在已登录的时候收到了更新群列表的操作
-            # 以username(@)信息作为唯一ID更新群成员的时候
-            WxGroupMember.save_by_username(group_member)
-            print('save user %s ' % group_contact['NickName'])
+                # 这里因为在已登录的时候收到了更新群列表的操作
+                # 以username(@)信息作为唯一ID更新群成员的时候
+                WxGroupMember.save_by_username(group_member)
+                print('save user %s ' % group_member['NickName'])

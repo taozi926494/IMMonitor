@@ -192,17 +192,6 @@ def produce_group_msg(msgList):
         else:
             continue
 
-
-        # # 如果信息发送人为自己
-        # if m['FromUserName'] == loginInfo['username']:
-        #     # 实际接收人 为 我发出的那段信息的 接收人
-        #     actualOpposite = m['ToUserName']
-        # # 如果信息发送人不是我自己
-        # else:
-        #     # 实际接收人 为 信息的发送人
-        #     actualOpposite = m['FromUserName']
-
-
         # 地图或者文本信息
         if m['MsgType'] == 1:
             # 如果m['Url']存在,表示为地图
